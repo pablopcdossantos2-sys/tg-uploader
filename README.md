@@ -170,6 +170,12 @@ Na seção **1. Conta Telegram**:
 2. No campo **API Hash**, cole o código recebido no mesmo site.
 3. No campo **Telefone**, digite seu número em formato internacional.
 
+Depois que você informar **API ID** e **API Hash** pela primeira vez, o TG Uploader os salva localmente. Nas próximas vezes em que o programa for aberto, esses campos serão preenchidos automaticamente — você não precisará digitá-los novamente.
+
+O **API ID** fica em `data/config.json` e o **API Hash** em `data/secrets.json`. Esses arquivos pertencem à sua cópia portátil do programa.
+
+> Se você apagar o conteúdo da pasta `data/` ou usar uma cópia limpa do TG Uploader, será necessário informar as credenciais novamente.
+
 Exemplo:
 
 ```text
