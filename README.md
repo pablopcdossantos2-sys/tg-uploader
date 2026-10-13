@@ -2,107 +2,556 @@
 
 **Leia este README em outros idiomas:** [English](README.en.md) · [Español](README.es.md)
 
-Aplicativo desktop portátil para Windows, escrito em Python, destinado ao envio de arquivos de uma pasta local para grupos do Telegram, com interface moderna, progresso real, histórico, prevenção de duplicados e retomada de filas interrompidas.
+Aplicativo portátil para Windows destinado ao envio de arquivos de uma pasta local para grupos do Telegram, com interface moderna, progresso real, histórico de uploads, prevenção de duplicados e retomada de filas interrompidas.
 
 > Projeto independente e não oficial. O TG Uploader usa a API do Telegram por meio da biblioteca Telethon e não é afiliado ao Telegram.
 
-## Recursos
+---
 
-- interface moderna com `CustomTkinter`;
-- idiomas **Português (Brasil)**, **English** e **Español**;
-- idioma escolhido salvo entre execuções;
-- autenticação da conta do Telegram pela própria GUI;
-- suporte a código de verificação e senha em duas etapas;
-- listagem dos grupos acessíveis pela conta;
-- seleção de uma pasta local pelo Explorador do Windows;
-- opção de incluir arquivos das subpastas;
-- pré-visualização da fila;
-- progresso real do arquivo atual;
-- progresso total da fila;
-- velocidade média de transferência;
-- cancelamento do upload;
-- **histórico persistente de uploads**;
-- **prevenção de arquivos duplicados**;
-- **retomada de filas interrompidas**;
-- versão **portátil**, sem instalador;
-- versão compilada que não exige Python no computador de destino;
-- compilação local com `build_portable.bat`;
-- compilação automática para Windows com GitHub Actions.
+# Para quem só quer usar o programa
 
-## Histórico de uploads
+Se você **não tem familiaridade com Terminal, PowerShell, Python ou GitHub**, esta é a parte mais importante do README.
 
-O programa mantém um histórico local em:
+Você **não precisa instalar Python** e **não precisa digitar comandos** para usar uma versão portátil já compilada.
+
+## Passo 1 — Baixar a versão portátil
+
+1. Abra a página do projeto no GitHub.
+2. Clique na aba **Actions**.
+3. Abra a execução mais recente chamada **Build portable Windows app** que esteja marcada com um ícone verde de sucesso.
+4. Role a página até a seção **Artifacts**.
+5. Clique em **TG-Uploader-Windows-Portable**.
+6. O navegador baixará um arquivo compactado `.zip`.
+
+> Se você recebeu a pasta portátil diretamente de outra pessoa, pode ignorar este passo.
+
+## Passo 2 — Extrair o arquivo ZIP
+
+1. Abra a pasta **Downloads** do Windows.
+2. Localize o arquivo baixado.
+3. Clique nele com o botão direito.
+4. Escolha **Extrair Tudo...**.
+5. Escolha uma pasta fácil de encontrar, por exemplo:
+
+```text
+C:\Programas\TG-Uploader
+```
+
+6. Clique em **Extrair**.
+
+Não execute o programa diretamente de dentro do ZIP. Extraia primeiro.
+
+## Passo 3 — Abrir o TG Uploader
+
+Entre na pasta extraída.
+
+Você deverá encontrar um arquivo parecido com:
+
+```text
+TG-Uploader.exe
+```
+
+Dê dois cliques nele.
+
+O Windows poderá mostrar uma mensagem de segurança porque o executável ainda não possui assinatura digital comercial. Se você confia no arquivo obtido deste repositório, use as opções do próprio Windows para continuar a execução.
+
+---
+
+# Antes do primeiro uso: criar as credenciais do Telegram
+
+O Telegram exige que aplicações que usam sua API possuam duas informações:
+
+- **API ID**
+- **API Hash**
+
+Você precisa fazer isso apenas uma vez para a sua conta.
+
+## Passo 1 — Entrar no site do Telegram
+
+1. Abra o navegador.
+2. Acesse:
+
+<https://my.telegram.org>
+
+3. Digite o número de telefone da sua conta do Telegram.
+4. Use o formato internacional.
+
+Exemplo para um número brasileiro:
+
+```text
++55 11 99999-9999
+```
+
+5. O Telegram enviará um código para sua conta.
+6. Digite esse código no site.
+
+## Passo 2 — Abrir a área de criação da API
+
+Depois de entrar no site:
+
+1. Clique em **API development tools**.
+2. Se for solicitado criar uma aplicação, preencha os campos.
+
+Você pode usar, por exemplo:
+
+```text
+App title: TG Uploader
+Short name: tguploader
+Platform: Desktop
+```
+
+Os demais campos podem ser preenchidos de maneira simples, desde que o Telegram aceite os valores.
+
+## Passo 3 — Guardar API ID e API Hash
+
+Depois de criar a aplicação, a página mostrará dados parecidos com:
+
+```text
+App api_id: 12345678
+App api_hash: abcdef1234567890abcdef1234567890
+```
+
+Guarde esses dois valores.
+
+Você precisará digitá-los no TG Uploader.
+
+**Não publique seu API Hash em fóruns, prints, vídeos ou commits do GitHub.**
+
+---
+
+# Primeiro uso do TG Uploader
+
+## Passo 1 — Escolher o idioma
+
+No topo da janela, escolha:
+
+- Português (Brasil)
+- English
+- Español
+
+A escolha ficará salva para as próximas execuções.
+
+## Passo 2 — Informar os dados da conta
+
+Na seção **1. Conta Telegram**:
+
+1. No campo **API ID**, digite apenas os números recebidos em `my.telegram.org`.
+2. No campo **API Hash**, cole o código recebido no mesmo site.
+3. No campo **Telefone**, digite seu número em formato internacional.
+
+Exemplo:
+
+```text
++5511999999999
+```
+
+## Passo 3 — Conectar ao Telegram
+
+Clique em:
+
+**Conectar e carregar grupos**
+
+Na primeira vez, o Telegram enviará um código de verificação.
+
+Uma pequena janela será aberta dentro do próprio TG Uploader.
+
+Digite o código e clique em **Confirmar**.
+
+Se sua conta possuir senha de verificação em duas etapas, outra janela aparecerá solicitando essa senha.
+
+## Passo 4 — Escolher o grupo de destino
+
+Depois da conexão, o TG Uploader carregará os grupos disponíveis para a sua conta.
+
+Na seção **2. Destino**:
+
+1. Abra a lista.
+2. Clique no grupo para o qual deseja enviar os arquivos.
+
+Sua conta precisa ter permissão para enviar arquivos nesse grupo.
+
+## Passo 5 — Escolher a pasta do computador
+
+Na seção **3. Pasta local**:
+
+1. Clique em **Procurar**.
+2. Navegue pelas pastas do Windows.
+3. Selecione a pasta que contém os arquivos.
+4. Clique em **Selecionar pasta**.
+
+A lista dos arquivos encontrados aparecerá no lado direito.
+
+Se quiser incluir também arquivos existentes dentro das subpastas, mantenha ativada a opção:
+
+**Incluir arquivos das subpastas**
+
+## Passo 6 — Conferir a proteção contra duplicados
+
+Por padrão, fica ativada a opção:
+
+**Ignorar arquivos já enviados ao mesmo grupo**
+
+Recomendamos deixá-la ativada.
+
+O programa calcula o SHA-256 de cada arquivo e evita enviar novamente o mesmo conteúdo para o mesmo grupo.
+
+Apenas renomear o arquivo não faz com que ele seja considerado um arquivo diferente.
+
+## Passo 7 — Iniciar o envio
+
+Clique em:
+
+**Iniciar upload**
+
+Durante o envio você verá:
+
+- arquivo atual;
+- porcentagem do arquivo;
+- progresso total;
+- quantidade de arquivos;
+- bytes enviados;
+- velocidade média.
+
+Você pode clicar em **Cancelar upload** a qualquer momento.
+
+---
+
+# Se o programa fechar ou a internet cair
+
+Não é necessário começar tudo novamente.
+
+O TG Uploader salva a fila no arquivo:
 
 ```text
 data\tg_uploader.db
 ```
 
-O banco SQLite registra, entre outras informações:
+Ao abrir novamente o programa, o botão:
+
+**Retomar fila interrompida**
+
+ficará disponível quando existir uma fila recuperável.
+
+Arquivos que já terminaram não serão enviados novamente.
+
+## Limitação importante da retomada
+
+A retomada acontece por arquivo.
+
+Exemplo:
+
+- arquivo 1 terminou: não será reenviado;
+- arquivo 2 estava em 50% quando caiu a internet: ele recomeçará do início;
+- arquivos seguintes continuam pendentes.
+
+Não existe, nesta versão, retomada a partir do byte exato em que um arquivo foi interrompido.
+
+---
+
+# Ver o histórico de uploads
+
+Clique em:
+
+**Ver histórico de uploads**
+
+O programa mostrará registros com informações como:
 
 - data e hora;
-- grupo de destino;
-- arquivo;
-- tamanho;
-- hash SHA-256;
-- estado do envio;
-- identificador da mensagem do Telegram quando disponível.
+- status;
+- grupo;
+- nome do arquivo;
+- tamanho.
 
-O histórico pode ser aberto diretamente pela GUI em **Ver histórico de uploads**.
+O histórico fica armazenado localmente no banco:
 
-## Prevenção de duplicados
+```text
+data\tg_uploader.db
+```
 
-Por padrão, a opção:
+---
+
+# Sobre a pasta data
+
+A pasta:
+
+```text
+data\
+```
+
+é muito importante.
+
+Ela pode conter:
+
+- configurações;
+- idioma escolhido;
+- histórico;
+- filas pendentes;
+- API ID;
+- API Hash;
+- sessão autenticada do Telegram.
+
+**Não envie essa pasta para outras pessoas.**
+
+Se quiser entregar uma cópia limpa do programa para outra pessoa:
+
+1. feche o TG Uploader;
+2. faça uma cópia da pasta inteira do programa;
+3. na cópia, apague o conteúdo de `data\`;
+4. entregue essa cópia limpa.
+
+A outra pessoa fará a própria autenticação.
+
+---
+
+# Usar o TG Uploader em um pendrive
+
+A aplicação é portátil.
+
+Você pode copiar a pasta inteira:
+
+```text
+TG-Uploader
+```
+
+para:
+
+- pendrive;
+- HD externo;
+- SSD externo;
+- outra pasta do computador.
+
+Não copie apenas `TG-Uploader.exe`.
+
+A pasta `_internal` também faz parte do programa.
+
+---
+
+# Para quem deseja gerar a versão portátil no próprio computador
+
+Esta seção é voltada para desenvolvimento ou para quem deseja produzir seu próprio executável.
+
+Se você apenas quer usar o programa, **não precisa fazer nada desta seção**.
+
+## Método mais simples: build_portable.bat
+
+### Passo 1 — Instalar o Python
+
+1. Acesse <https://www.python.org/downloads/>.
+2. Baixe uma versão recente do Python 3.
+3. Abra o instalador.
+4. Na primeira tela, marque a opção parecida com:
+
+```text
+Add Python to PATH
+```
+
+5. Clique em **Install Now**.
+6. Aguarde a instalação terminar.
+
+## Passo 2 — Baixar o código do projeto
+
+Na página principal do repositório:
+
+1. clique no botão verde **Code**;
+2. clique em **Download ZIP**;
+3. abra a pasta Downloads;
+4. clique com o botão direito no ZIP;
+5. escolha **Extrair Tudo...**.
+
+## Passo 3 — Executar o arquivo de compilação
+
+Dentro da pasta extraída, procure:
+
+```text
+build_portable.bat
+```
+
+Dê dois cliques.
+
+Uma janela preta aparecerá.
+
+Isso é normal.
+
+Você **não precisa digitar nada**.
+
+O script executará automaticamente:
+
+- preparação do ambiente;
+- instalação das bibliotecas;
+- verificação do código;
+- testes;
+- compilação;
+- preparação da pasta portátil.
+
+Quando aparecer a mensagem:
+
+```text
+Build concluido com sucesso.
+```
+
+a versão pronta estará em:
+
+```text
+dist\TG-Uploader
+```
+
+---
+
+# Executar pelo código-fonte — tutorial para iniciantes
+
+Esta seção utiliza PowerShell.
+
+Você só precisa dela se quiser desenvolver ou testar o código Python diretamente.
+
+## Passo 1 — Abrir o PowerShell já dentro da pasta correta
+
+1. Abra a pasta do projeto no **Explorador de Arquivos**.
+2. Clique uma vez na barra de endereço, onde aparece o caminho da pasta.
+3. Apague o caminho mostrado.
+4. Digite:
+
+```text
+powershell
+```
+
+5. Pressione **Enter**.
+
+Uma janela azul ou preta será aberta.
+
+Ela já estará apontando para a pasta correta.
+
+Você verá algo parecido com:
+
+```text
+PS C:\Users\SeuNome\Downloads\tg-uploader-main>
+```
+
+O texto antes do símbolo `>` pode ser diferente no seu computador. Isso é normal.
+
+## Passo 2 — Criar um ambiente virtual
+
+Copie este comando:
+
+```powershell
+python -m venv .venv
+```
+
+Cole na janela do PowerShell e pressione **Enter**.
+
+Se tudo der certo, normalmente nenhuma mensagem importante aparecerá. Uma nova pasta chamada `.venv` será criada.
+
+## Passo 3 — Ativar o ambiente
+
+Digite:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Pressione **Enter**.
+
+Se funcionar, o início da linha passará a mostrar algo parecido com:
+
+```text
+(.venv) PS C:\...
+```
+
+### Se aparecer erro sobre execução de scripts
+
+Você pode simplesmente pular a ativação e usar os comandos seguintes normalmente com:
+
+```powershell
+.\.venv\Scripts\python.exe
+```
+
+Por exemplo:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+## Passo 4 — Instalar as bibliotecas
+
+Com o ambiente ativado, execute:
+
+```powershell
+python -m pip install --upgrade pip
+```
+
+Aguarde terminar.
+
+Depois execute:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Você verá várias linhas sendo exibidas. Isso é normal.
+
+Espere até o PowerShell voltar a mostrar uma nova linha começando com `PS`.
+
+## Passo 5 — Abrir o programa
+
+Execute:
+
+```powershell
+python main.py
+```
+
+A janela do TG Uploader deverá aparecer.
+
+---
+
+# Erros comuns
+
+## “python não é reconhecido”
+
+Isso normalmente significa que o Python não foi instalado ou não foi adicionado ao PATH.
+
+Tente:
+
+```powershell
+py --version
+```
+
+Se funcionar, você pode substituir `python` por `py` nos comandos.
+
+Caso nenhum funcione, reinstale o Python e marque **Add Python to PATH**.
+
+## O PowerShell abriu em outra pasta
+
+Feche a janela e repita:
+
+1. abra a pasta correta no Explorador;
+2. clique na barra de endereço;
+3. digite `powershell`;
+4. pressione Enter.
+
+## O grupo não aparece
+
+Confirme que:
+
+- a conta autenticada participa do grupo;
+- a conta possui acesso ao grupo;
+- você autenticou a conta correta.
+
+## O botão “Retomar fila interrompida” não aparece
+
+Ele só fica disponível quando existe uma fila incompleta gravada no banco local.
+
+## Um arquivo duplicado não foi enviado
+
+Isso é esperado quando a proteção contra duplicados está ativada.
+
+Se realmente quiser reenviar o arquivo, desative:
 
 **Ignorar arquivos já enviados ao mesmo grupo**
 
-fica ativada.
+antes de criar uma nova fila.
 
-Antes do upload, o TG Uploader calcula o **SHA-256** do arquivo e consulta o histórico.
+---
 
-Um arquivo é considerado duplicado quando:
-
-1. possui o mesmo conteúdo, isto é, o mesmo SHA-256; e
-2. já foi enviado anteriormente para o mesmo grupo.
-
-Isso significa que apenas renomear um arquivo não faz com que ele seja reenviado.
-
-O mesmo arquivo ainda pode ser enviado normalmente para outro grupo.
-
-Se for necessário reenviar deliberadamente um arquivo idêntico para o mesmo grupo, desative a opção de prevenção de duplicados antes de criar uma nova fila.
-
-## Retomada de filas interrompidas
-
-A fila é registrada em SQLite antes do início do envio.
-
-Depois de cada arquivo, seu estado é atualizado. Portanto, se o programa for fechado, o computador for reiniciado ou a conexão falhar:
-
-- arquivos já concluídos permanecem concluídos;
-- duplicados já ignorados permanecem concluídos;
-- arquivos pendentes continuam pendentes;
-- o arquivo que estava sendo transmitido volta para o estado pendente;
-- arquivos com falha podem ser tentados novamente.
-
-Na próxima execução, o botão **Retomar fila interrompida** fica disponível quando existir uma fila recuperável.
-
-### Limitação importante
-
-A retomada ocorre **por arquivo**, e não no meio dos bytes de um arquivo.
-
-Se um arquivo de 2 GB for interrompido após 1 GB, esse arquivo específico será iniciado novamente desde o começo. Os arquivos anteriores da fila não serão reenviados.
-
-## Idiomas
-
-O idioma pode ser alterado no cabeçalho da aplicação:
-
-- Português (Brasil);
-- English;
-- Español.
-
-A preferência é gravada em `data/config.json`.
-
-## Versão portátil
-
-A distribuição compilada possui aproximadamente esta estrutura:
+# Estrutura da versão portátil
 
 ```text
 TG-Uploader/
@@ -115,160 +564,15 @@ TG-Uploader/
 └── PORTABLE.md
 ```
 
-A pasta inteira pode ser movida para outro diretório, HD externo ou pendrive.
+---
 
-O computador de destino **não precisa ter Python instalado**.
-
-Leia também [PORTABLE.md](PORTABLE.md).
-
-## Dados portáteis e segurança
-
-A pasta `data/` acompanha o programa e pode conter:
-
-- configurações;
-- histórico e filas;
-- API ID;
-- API Hash;
-- sessão autenticada do Telegram.
-
-**Não compartilhe nem publique a pasta `data/`.**
-
-Ela já está incluída no `.gitignore`.
-
-Se uma cópia contendo sua sessão for perdida, revogue a sessão em:
-
-**Telegram → Configurações → Dispositivos**
-
-Para entregar uma cópia limpa a outra pessoa, distribua a aplicação com a pasta `data/` vazia.
-
-## Requisitos da versão portátil pronta
-
-- Windows 10 ou Windows 11;
-- acesso à internet;
-- uma conta do Telegram com acesso ao grupo de destino;
-- `api_id` e `api_hash` próprios obtidos em <https://my.telegram.org>.
-
-Python não é necessário no computador que executará uma versão já compilada.
-
-## Criar as credenciais do Telegram
-
-1. Acesse <https://my.telegram.org>.
-2. Entre com a conta que será usada pelo TG Uploader.
-3. Abra **API development tools**.
-4. Crie uma aplicação.
-5. Guarde **App api_id** e **App api_hash**.
-
-Nunca publique seu API Hash, código de verificação, senha ou arquivo de sessão.
-
-## Gerar a versão portátil com dois cliques
-
-O computador usado para compilar precisa ter Python 3.11 ou mais recente.
-
-Depois de baixar ou clonar o repositório, execute:
-
-```text
-build_portable.bat
-```
-
-Ao final, a aplicação estará em:
-
-```text
-dist\TG-Uploader
-```
-
-Copie a pasta `TG-Uploader` inteira.
-
-## Compilar pelo GitHub Actions
-
-O workflow:
-
-```text
-.github/workflows/build-windows.yml
-```
-
-gera o artefato:
-
-```text
-TG-Uploader-Windows-Portable
-```
-
-Ele também pode ser iniciado manualmente na aba **Actions** do GitHub.
-
-## Executar pelo código-fonte
-
-Clone o projeto:
-
-```powershell
-git clone https://github.com/pablopcdossantos2-sys/tg-uploader.git
-cd tg-uploader
-```
-
-Crie e ative um ambiente virtual:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-Instale as dependências:
-
-```powershell
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-Execute:
-
-```powershell
-python main.py
-```
-
-## Primeiro uso
-
-1. Abra o TG Uploader.
-2. Escolha o idioma desejado.
-3. Informe **API ID**.
-4. Informe **API Hash**.
-5. Informe o telefone em formato internacional.
-6. Clique em **Conectar e carregar grupos**.
-7. Digite o código enviado pelo Telegram.
-8. Informe a senha em duas etapas, se aplicável.
-9. Escolha o grupo.
-10. Selecione a pasta local.
-11. Confira a fila.
-12. Mantenha ou desative a proteção contra duplicados.
-13. Clique em **Iniciar upload**.
-
-## Estrutura do projeto
-
-```text
-tg-uploader/
-├── .github/
-│   └── workflows/
-│       └── build-windows.yml
-├── build_portable.bat
-├── main.py
-├── PORTABLE.md
-├── README.md
-├── README.en.md
-├── README.es.md
-├── requirements.txt
-└── src/
-    ├── __init__.py
-    ├── config.py
-    ├── i18n.py
-    ├── storage.py
-    ├── telegram_service.py
-    └── ui.py
-```
-
-## Referências
+# Referências
 
 - Telegram — API ID e API Hash: <https://core.telegram.org/api/obtaining_api_id>
 - Telegram — Termos de Serviço da API: <https://core.telegram.org/api/terms>
 - Telethon: <https://docs.telethon.dev/>
 - PyInstaller: <https://pyinstaller.org/>
 
-## Licença
+# Licença
 
 Ainda não definida. Antes de distribuir releases publicamente, adicione uma licença apropriada ao projeto.
