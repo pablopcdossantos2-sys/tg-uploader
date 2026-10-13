@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Build
+build/
+dist/
+*.spec
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local secrets / Telegram sessions
+.env
+*.session
+*.session-journal
+config.json
