@@ -148,14 +148,18 @@ class QueueStore:
                     ON upload_history(group_id, sha256, status);
                 CREATE INDEX IF NOT EXISTS idx_history_time
                     ON upload_history(occurred_at DESC);
-                CREATE INDEX IF NOT EXISTS idx_history_duplicate_topic
-                    ON upload_history(group_id, topic_id, sha256, status);
                 """
             )
             self._ensure_column(conn, "upload_jobs", "topic_id", "INTEGER")
             self._ensure_column(conn, "upload_jobs", "topic_title", "TEXT")
             self._ensure_column(conn, "upload_history", "topic_id", "INTEGER")
             self._ensure_column(conn, "upload_history", "topic_title", "TEXT")
+            conn.execute(
+                """
+                CREATE INDEX IF NOT EXISTS idx_history_duplicate_topic
+                ON upload_history(group_id, topic_id, sha256, status)
+                """
+            )
 
     @staticmethod
     def _ensure_column(
