@@ -188,6 +188,22 @@ If your account uses two-step verification, another dialog asks for that passwor
 
 After connecting, TG Uploader loads the groups available to your account.
 
+The list is designed to avoid confusion with Telegram's internal identifiers. Whenever possible, each destination is shown as:
+
+```text
+Group name · Type · @username
+```
+
+Example:
+
+```text
+Project Team · Forum · @projectteam
+```
+
+If the group has no `@username`, the application may show a **technical ID**. That number is only used to distinguish Telegram entities with the same name; you do not need to interpret it to choose the destination.
+
+Old groups that Telegram migrated to supergroups are ignored in the list, preventing the old and new entities from appearing as duplicate names.
+
 Under **2. Destination — group and topic**:
 
 1. open the first list;
