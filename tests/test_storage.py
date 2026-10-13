@@ -37,6 +37,8 @@ class QueueStoreTests(unittest.TestCase):
             item,
             100,
             "Group A",
+            None,
+            None,
             self.file_a.stat().st_size,
             checksum,
             123,
@@ -45,6 +47,41 @@ class QueueStoreTests(unittest.TestCase):
         self.assertTrue(self.store.is_duplicate(100, checksum))
         self.assertFalse(self.store.is_duplicate(200, checksum))
         self.assertFalse(self.store.is_duplicate(100, sha256_file(self.file_b)))
+
+    def test_duplicate_is_scoped_to_topic_inside_same_group(self):
+        job_id = self.store.create_job(
+            [self.file_a],
+            self.root,
+            100,
+            "Forum Group",
+            True,
+            topic_id=10,
+            topic_title="Topic A",
+        )
+        item = self.store.items_for_job(job_id)[0]
+        checksum = sha256_file(self.file_a)
+
+        self.store.mark_item_completed(
+            item,
+            100,
+            "Forum Group",
+            10,
+            "Topic A",
+            self.file_a.stat().st_size,
+            checksum,
+            555,
+        )
+
+        self.assertTrue(self.store.is_duplicate(100, checksum, topic_id=10))
+        self.assertFalse(self.store.is_duplicate(100, checksum, topic_id=20))
+        self.assertFalse(self.store.is_duplicate(100, checksum, topic_id=None))
+
+        summary = self.store.get_job(job_id)
+        self.assertEqual(summary.topic_id, 10)
+        self.assertEqual(summary.topic_title, "Topic A")
+
+        history = self.store.history()
+        self.assertEqual(history[0].topic_title, "Topic A")
 
     def test_running_item_is_recovered_as_pending(self):
         job_id = self.store.create_job(
@@ -83,6 +120,8 @@ class QueueStoreTests(unittest.TestCase):
             first,
             100,
             "Group A",
+            None,
+            None,
             self.file_a.stat().st_size,
             checksum,
             321,
@@ -111,6 +150,8 @@ class QueueStoreTests(unittest.TestCase):
             item,
             100,
             "Group A",
+            None,
+            None,
             self.file_a.stat().st_size,
             checksum,
             999,
