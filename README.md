@@ -66,6 +66,31 @@ O Telegram exige que aplicações que usam sua API possuam duas informações:
 
 Você precisa fazer isso apenas uma vez para a sua conta.
 
+## Se você já possui um App api_id e um App api_hash
+
+Se você já criou uma aplicação no Telegram anteriormente e já possui:
+
+- **App api_id**
+- **App api_hash**
+
+**não é necessário criar outra aplicação apenas para usar o TG Uploader.**
+
+Nesse caso:
+
+1. acesse <https://my.telegram.org>;
+2. entre com a mesma conta do Telegram;
+3. abra **API development tools**;
+4. localize o **App api_id** e o **App api_hash** da aplicação que você já controla;
+5. copie esses dois valores;
+6. no TG Uploader, informe o `App api_id` no campo **API ID** e o `App api_hash` no campo **API Hash**;
+7. prossiga normalmente para a autenticação da conta.
+
+Você pode então **pular a etapa de criar uma nova aplicação** descrita abaixo.
+
+> Reutilize apenas credenciais de uma aplicação que pertença a você ou que você esteja autorizado a administrar. Não use credenciais encontradas na internet ou fornecidas por terceiros desconhecidos.
+
+> Não há vantagem em criar várias aplicações do Telegram sem necessidade. Se as suas credenciais atuais são válidas e você tem acesso a elas, normalmente basta reutilizá-las.
+
 ## Passo 1 — Entrar no site do Telegram
 
 1. Abra o navegador.
@@ -90,7 +115,9 @@ Exemplo para um número brasileiro:
 Depois de entrar no site:
 
 1. Clique em **API development tools**.
-2. Se for solicitado criar uma aplicação, preencha os campos.
+2. Verifique primeiro se já aparecem um **App api_id** e um **App api_hash**.
+3. Se esses dados já existirem e pertencerem a uma aplicação sua, você pode reutilizá-los e **não precisa criar uma nova aplicação**.
+4. Somente se ainda não existir uma aplicação registrada para você, preencha os campos para criar uma.
 
 Você pode usar, por exemplo:
 
