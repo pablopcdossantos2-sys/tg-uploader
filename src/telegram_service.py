@@ -155,6 +155,7 @@ class TelegramService:
 
         total_bytes = 0
         completed_bytes = 0
+        uploaded_this_run = 0
         for item in items:
             if item.status in {"completed", "skipped_duplicate"}:
                 size = item.size
@@ -214,6 +215,7 @@ class TelegramService:
                         checksum,
                     )
                     completed_bytes += file_total
+                    uploaded_this_run += file_total
                     elapsed = max(time.monotonic() - started_at, 0.001)
                     on_status(self._t("status_duplicate", name=item.path.name))
                     on_progress(
@@ -225,7 +227,7 @@ class TelegramService:
                             file_total=file_total,
                             total_sent=completed_bytes,
                             total_bytes=total_bytes,
-                            bytes_per_second=completed_bytes / elapsed,
+                            bytes_per_second=uploaded_this_run / elapsed,
                         )
                     )
                     continue
@@ -253,7 +255,7 @@ class TelegramService:
                             file_total=int(total),
                             total_sent=current_total_sent,
                             total_bytes=total_bytes,
-                            bytes_per_second=current_total_sent / elapsed,
+                            bytes_per_second=(uploaded_this_run + int(sent)) / elapsed,
                         )
                     )
 
@@ -284,7 +286,7 @@ class TelegramService:
                             file_total=file_total,
                             total_sent=completed_bytes,
                             total_bytes=total_bytes,
-                            bytes_per_second=completed_bytes / elapsed,
+                            bytes_per_second=uploaded_this_run / elapsed,
                         )
                     )
                 except UploadCancelled:
