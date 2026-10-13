@@ -215,7 +215,6 @@ class TelegramService:
                         checksum,
                     )
                     completed_bytes += file_total
-                    uploaded_this_run += file_total
                     elapsed = max(time.monotonic() - started_at, 0.001)
                     on_status(self._t("status_duplicate", name=item.path.name))
                     on_progress(
@@ -276,6 +275,7 @@ class TelegramService:
                         int(message_id) if message_id is not None else None,
                     )
                     completed_bytes += file_total
+                    uploaded_this_run += file_total
                     elapsed = max(time.monotonic() - started_at, 0.001)
                     on_progress(
                         UploadProgress(
