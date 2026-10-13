@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
@@ -82,6 +83,73 @@ class QueueStoreTests(unittest.TestCase):
 
         history = self.store.history()
         self.assertEqual(history[0].topic_title, "Topic A")
+
+    def test_legacy_database_is_migrated_for_topics(self):
+        legacy = self.root / "legacy.db"
+        conn = sqlite3.connect(legacy)
+        try:
+            conn.executescript(
+                """
+                CREATE TABLE upload_jobs (
+                    id TEXT PRIMARY KEY,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    group_id INTEGER NOT NULL,
+                    group_title TEXT NOT NULL,
+                    source_folder TEXT NOT NULL,
+                    recursive INTEGER NOT NULL DEFAULT 1,
+                    status TEXT NOT NULL,
+                    total_files INTEGER NOT NULL,
+                    total_bytes INTEGER NOT NULL
+                );
+                CREATE TABLE upload_items (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_id TEXT NOT NULL,
+                    position INTEGER NOT NULL,
+                    path TEXT NOT NULL,
+                    relative_path TEXT NOT NULL,
+                    size INTEGER NOT NULL,
+                    sha256 TEXT,
+                    status TEXT NOT NULL DEFAULT 'pending',
+                    error TEXT,
+                    message_id INTEGER,
+                    started_at TEXT,
+                    completed_at TEXT
+                );
+                CREATE TABLE upload_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    occurred_at TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    group_id INTEGER NOT NULL,
+                    group_title TEXT NOT NULL,
+                    job_id TEXT,
+                    item_id INTEGER,
+                    path TEXT NOT NULL,
+                    file_name TEXT NOT NULL,
+                    size INTEGER NOT NULL,
+                    sha256 TEXT,
+                    message_id INTEGER,
+                    note TEXT
+                );
+                """
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+        QueueStore(legacy)
+
+        conn = sqlite3.connect(legacy)
+        try:
+            job_columns = {row[1] for row in conn.execute("PRAGMA table_info(upload_jobs)")}
+            history_columns = {row[1] for row in conn.execute("PRAGMA table_info(upload_history)")}
+        finally:
+            conn.close()
+
+        self.assertIn("topic_id", job_columns)
+        self.assertIn("topic_title", job_columns)
+        self.assertIn("topic_id", history_columns)
+        self.assertIn("topic_title", history_columns)
 
     def test_running_item_is_recovered_as_pending(self):
         job_id = self.store.create_job(
