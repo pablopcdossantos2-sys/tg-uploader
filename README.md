@@ -1,62 +1,142 @@
 # TG Uploader
 
-Aplicativo desktop em Python para enviar todos os arquivos de uma pasta local para um grupo do Telegram, com interface gráfica moderna e acompanhamento real do progresso de upload.
+Aplicativo desktop em Python para enviar arquivos de uma pasta local para um grupo do Telegram, com interface gráfica moderna, acompanhamento real do progresso e suporte a uma **versão portátil para Windows**.
 
 > Projeto independente e não oficial. O aplicativo usa a API do Telegram por meio da biblioteca Telethon e não é afiliado ao Telegram.
 
-## O que a primeira versão faz
+## Principais recursos
 
-- interface gráfica moderna com `CustomTkinter`;
-- autenticação de uma conta do Telegram por código de verificação e, quando necessário, senha de duas etapas;
+- interface moderna com `CustomTkinter`;
+- autenticação por código de verificação e suporte a senha de duas etapas;
 - listagem dos grupos acessíveis pela conta conectada;
-- seleção de uma pasta local pelo explorador de arquivos;
+- seleção de uma pasta pelo Explorador do Windows;
 - opção de incluir ou ignorar subpastas;
-- pré-visualização da fila de arquivos antes do envio;
+- pré-visualização da fila de arquivos;
 - upload sequencial dos arquivos como documentos;
-- porcentagem real do arquivo atual, calculada com os bytes informados pelo `progress_callback` do Telethon;
+- porcentagem real do arquivo atual usando os bytes informados pelo Telethon;
 - progresso total da pasta;
-- indicação do arquivo atual, quantidade de arquivos, bytes enviados e velocidade média;
+- indicação de arquivo atual, quantidade de arquivos, bytes enviados e velocidade média;
 - cancelamento do upload;
-- armazenamento da sessão do Telegram e das preferências na pasta de dados do usuário, fora do repositório;
-- armazenamento do `API Hash` pelo gerenciador de credenciais do sistema quando disponível via `keyring`.
+- sessão persistente;
+- **modo portátil**, sem instalador;
+- **execução no PC de destino sem Python**, quando usada a versão compilada;
+- build portátil por duplo clique em `build_portable.bat`;
+- build automático para Windows pelo GitHub Actions.
 
-## Requisitos
+## Versão portátil
 
-- Windows 10 ou Windows 11;
-- Python 3.11 ou mais recente recomendado;
-- uma conta do Telegram que participe do grupo de destino e tenha permissão para enviar arquivos;
-- `api_id` e `api_hash` próprios, criados em <https://my.telegram.org>.
-
-A API do Telegram é oferecida gratuitamente, mas o uso deve respeitar os Termos de Serviço da API. Não use a aplicação para spam, flooding ou automação abusiva.
-
-## 1. Baixar o projeto
-
-Na página do repositório, clique em **Code > Download ZIP**. Extraia o arquivo ZIP para uma pasta fácil de localizar, por exemplo:
+A aplicação foi desenhada para que a versão compilada possa ser copiada como uma pasta independente:
 
 ```text
-C:\Programas\tg-uploader
+TG-Uploader/
+├── TG-Uploader.exe
+├── _internal/
+├── data/
+├── README.md
+└── PORTABLE.md
 ```
 
-Também é possível clonar com Git:
+Os dados persistentes são gravados em:
+
+```text
+TG-Uploader\data
+```
+
+Portanto, a aplicação não depende de `%APPDATA%` para manter a sessão.
+
+A pasta completa pode ser movida para outro diretório, HD externo ou pendrive. O computador de destino **não precisa ter Python instalado**.
+
+Leia também [PORTABLE.md](PORTABLE.md).
+
+## Importante sobre segurança e portabilidade
+
+Para que a sessão continue funcionando ao mover a aplicação, os dados de autenticação precisam acompanhar o executável.
+
+A pasta `data/` pode conter:
+
+- configurações;
+- telefone;
+- API ID;
+- API Hash;
+- arquivo de sessão autenticada do Telegram.
+
+Por isso:
+
+**não publique nem compartilhe a pasta `data/`.**
+
+Ela já está incluída no `.gitignore` do projeto.
+
+Se uma cópia portátil contendo sua sessão for perdida ou roubada, revogue essa sessão em **Telegram → Configurações → Dispositivos**.
+
+Para entregar uma cópia limpa da aplicação a outra pessoa, copie a pasta portátil e deixe a pasta `data/` vazia.
+
+## Requisitos para usar a versão portátil pronta
+
+- Windows 10 ou Windows 11;
+- acesso à internet;
+- uma conta do Telegram que tenha acesso ao grupo de destino;
+- `api_id` e `api_hash` próprios, obtidos em <https://my.telegram.org>.
+
+Python **não é necessário** para executar uma versão portátil já compilada.
+
+## Criar as credenciais da API do Telegram
+
+1. Acesse <https://my.telegram.org>.
+2. Entre com o número da conta que será usada no TG Uploader.
+3. Abra **API development tools**.
+4. Crie uma aplicação.
+5. Guarde **App api_id** e **App api_hash**.
+
+Nunca publique seu `api_hash`, código de verificação, senha ou arquivo de sessão.
+
+## Opção A — gerar a versão portátil com dois cliques
+
+Esta é a forma recomendada para quem quer produzir o executável localmente.
+
+O computador usado **para compilar** precisa ter Python 3.11 ou mais recente instalado.
+
+Depois de baixar ou clonar o projeto, dê dois cliques em:
+
+```text
+build_portable.bat
+```
+
+O script cria sozinho um ambiente de compilação, instala as dependências e executa o PyInstaller.
+
+Ao final, a aplicação pronta estará em:
+
+```text
+dist\TG-Uploader
+```
+
+Copie a pasta `TG-Uploader` inteira. Não copie somente o arquivo `.exe`, porque a versão atual utiliza o formato `onedir` do PyInstaller.
+
+## Opção B — baixar um build gerado pelo GitHub Actions
+
+O repositório contém o workflow:
+
+```text
+.github/workflows/build-windows.yml
+```
+
+Ele gera o artefato:
+
+```text
+TG-Uploader-Windows-Portable
+```
+
+O workflow também pode ser iniciado manualmente na aba **Actions** do GitHub.
+
+Essa abordagem permite compilar o programa na infraestrutura do GitHub sem configurar um ambiente de desenvolvimento local.
+
+## Opção C — executar diretamente pelo Python
+
+Para desenvolvimento ou testes, clone o projeto:
 
 ```powershell
 git clone https://github.com/pablopcdossantos2-sys/tg-uploader.git
 cd tg-uploader
 ```
-
-## 2. Criar as credenciais da API do Telegram
-
-1. Acesse <https://my.telegram.org>.
-2. Entre com o mesmo número de telefone da conta que será usada pelo programa.
-3. Abra **API development tools**.
-4. Crie uma aplicação.
-5. Guarde os valores **App api_id** e **App api_hash**.
-
-Nunca publique seu `api_hash` em commits, prints ou arquivos enviados para terceiros.
-
-## 3. Preparar o Python no Windows
-
-Abra o **PowerShell** dentro da pasta do projeto. Uma forma simples é abrir a pasta no Explorador, clicar na barra de endereço, digitar `powershell` e pressionar Enter.
 
 Crie um ambiente virtual:
 
@@ -64,13 +144,11 @@ Crie um ambiente virtual:
 python -m venv .venv
 ```
 
-Ative o ambiente:
+Ative-o:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
-
-Se o Windows bloquear a ativação do ambiente, você pode instalar as dependências diretamente com `python -m pip install -r requirements.txt`, sem ativar o ambiente.
 
 Instale as dependências:
 
@@ -79,51 +157,42 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## 4. Executar
-
-Com o PowerShell ainda aberto na pasta do projeto:
+Execute:
 
 ```powershell
 python main.py
 ```
 
-## 5. Primeiro acesso
+Mesmo nesse modo, os dados locais são armazenados na pasta `data/` na raiz do projeto. Essa pasta é ignorada pelo Git.
 
-1. Preencha **API ID**, **API Hash** e o telefone no formato internacional, por exemplo `+5511999999999`.
-2. Clique em **Conectar e carregar grupos**.
-3. O Telegram enviará um código de verificação para a conta. Digite o código na janela da aplicação.
-4. Se a conta possuir verificação em duas etapas, informe também a senha quando solicitada.
-5. Escolha o grupo na lista carregada.
-6. Selecione a pasta que contém os arquivos.
-7. Confira a fila.
-8. Clique em **Iniciar upload**.
+## Primeiro acesso
 
-A sessão autorizada fica armazenada na pasta de dados do usuário. Assim, normalmente não será necessário inserir o código de verificação em toda execução.
+1. Abra o TG Uploader.
+2. Informe **API ID**.
+3. Informe **API Hash**.
+4. Informe o telefone no formato internacional, por exemplo `+5511999999999`.
+5. Clique em **Conectar e carregar grupos**.
+6. Digite o código enviado pelo Telegram.
+7. Caso exista verificação em duas etapas, informe a senha.
+8. Selecione o grupo de destino.
+9. Selecione a pasta local.
+10. Confira a fila.
+11. Clique em **Iniciar upload**.
 
-## Onde ficam os dados locais
-
-No Windows, a aplicação utiliza aproximadamente esta pasta:
-
-```text
-%APPDATA%\TGUploader
-```
-
-Nela ficam a sessão do Telethon e as preferências da interface. O `API Hash` é enviado ao `keyring`, que usa o mecanismo de credenciais disponível no sistema operacional.
-
-## Segurança
-
-- Não coloque `api_id`, `api_hash`, códigos de verificação ou senhas no código-fonte.
-- Não envie o arquivo de sessão do Telethon a terceiros; ele representa uma sessão autenticada da sua conta.
-- Revogue sessões desconhecidas em **Telegram > Configurações > Dispositivos**.
-- Use apenas grupos em que a conta tenha autorização para publicar arquivos.
+Depois da primeira autenticação, a sessão é mantida em `data/`, evitando a necessidade de repetir o login a cada execução, enquanto a sessão continuar válida.
 
 ## Estrutura do projeto
 
 ```text
 tg-uploader/
+├── .github/
+│   └── workflows/
+│       └── build-windows.yml
+├── build_portable.bat
 ├── main.py
-├── requirements.txt
+├── PORTABLE.md
 ├── README.md
+├── requirements.txt
 └── src/
     ├── __init__.py
     ├── config.py
@@ -131,16 +200,51 @@ tg-uploader/
     └── ui.py
 ```
 
-## Próximos avanços sugeridos
+A pasta `data/` só aparece localmente depois da execução e não deve ser enviada ao GitHub.
 
-A arquitetura foi deixada preparada para receber recursos adicionais, como retomada de fila após falha, histórico de uploads, filtros por extensão, limite de velocidade, múltiplos destinos, criação de executável `.exe` com PyInstaller e checksum para evitar reenvio acidental de arquivos já enviados.
+## Por que usamos uma pasta portátil em vez de somente um EXE?
+
+O programa é compilado inicialmente com o modo `onedir` do PyInstaller.
+
+Isso oferece algumas vantagens para este projeto:
+
+- inicialização mais previsível;
+- melhor compatibilidade com bibliotecas gráficas;
+- evita a extração completa da aplicação para uma pasta temporária a cada execução;
+- torna mais simples manter a pasta `data/` ao lado da aplicação;
+- continua sendo portátil: basta copiar a pasta inteira.
+
+No futuro também podemos oferecer uma variante `onefile`, mas ela não elimina a necessidade de algum armazenamento persistente para a sessão do Telegram.
+
+## Segurança
+
+- Nunca envie a pasta `data/` para o GitHub.
+- Nunca compartilhe o arquivo `telegram_session.session`.
+- Não publique o API Hash.
+- Revogue sessões desconhecidas em **Telegram → Configurações → Dispositivos**.
+- Use somente contas e grupos nos quais você tenha autorização para realizar os uploads.
+- A API do Telegram deve ser utilizada de acordo com os Termos de Serviço da plataforma.
+
+## Próximos avanços
+
+Alguns recursos previstos para evoluções futuras:
+
+- histórico de uploads;
+- identificação de arquivos já enviados;
+- retomada de filas interrompidas;
+- filtros por extensão;
+- logs de falhas;
+- checksum para reduzir reenvios acidentais;
+- empacotamento de releases assinadas;
+- atualização automática opcional.
 
 ## Referências
 
-- Telegram — criação do `api_id` e `api_hash`: <https://core.telegram.org/api/obtaining_api_id>
+- Telegram — API ID e API Hash: <https://core.telegram.org/api/obtaining_api_id>
 - Telegram — Termos de Serviço da API: <https://core.telegram.org/api/terms>
-- Telethon — documentação: <https://docs.telethon.dev/>
+- Telethon: <https://docs.telethon.dev/>
+- PyInstaller: <https://pyinstaller.org/>
 
 ## Licença
 
-Ainda não definida. Antes de distribuir versões compiladas publicamente, escolha e adicione uma licença adequada ao repositório.
+Ainda não definida. Antes de distribuir releases publicamente, escolha e adicione uma licença apropriada ao projeto.
