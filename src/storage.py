@@ -70,12 +70,12 @@ class QueueStore:
         conn = sqlite3.connect(self.path, timeout=30)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
-        conn.execute("PRAGMA journal_mode = WAL")
         return conn
 
     def _init_schema(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self._connect() as conn:
+            conn.execute("PRAGMA journal_mode = WAL")
             conn.executescript(
                 """
                 CREATE TABLE IF NOT EXISTS upload_jobs (
