@@ -119,6 +119,10 @@ En la parte superior seleccione:
 
 La aplicación recordará su elección.
 
+De forma predeterminada, la ventana principal se abre **maximizada** para facilitar la visualización de la cola y del progreso.
+
+Los campos que requieren introducir información muestran una pista dentro del propio campo, con un ejemplo o una indicación del valor esperado.
+
 ## Paso 2 — Introducir los datos de la cuenta
 
 En **1. Cuenta de Telegram**:
@@ -147,16 +151,36 @@ Introduzca el código y haga clic en **Confirmar**.
 
 Si su cuenta utiliza verificación en dos pasos, aparecerá otra ventana solicitando esa contraseña.
 
-## Paso 4 — Elegir el grupo de destino
+## Paso 4 — Elegir el grupo y, si lo desea, un tema
 
 Después de conectarse, TG Uploader cargará los grupos disponibles.
 
-En **2. Destino**:
+En **2. Destino — grupo y tema**:
 
-1. abra la lista;
-2. seleccione el grupo deseado.
+1. abra la primera lista;
+2. seleccione el grupo;
+3. espere unos instantes mientras TG Uploader comprueba si ese grupo utiliza temas.
+
+Si el grupo **no utiliza temas**, el selector de tema permanecerá deshabilitado.
+
+Si el grupo **utiliza temas**, la segunda lista quedará disponible. Podrá elegir:
+
+- **General / sin tema específico**; o
+- un tema concreto identificado por su nombre e ID.
+
+Ejemplo:
+
+```text
+Anuncios · 1234
+```
+
+Todos los archivos de esa cola se enviarán al tema seleccionado.
+
+El tema queda guardado junto con la cola. Si el envío se interrumpe y se reanuda más tarde, los archivos restantes continuarán hacia el **mismo tema original**.
 
 La cuenta debe tener permiso para enviar archivos a ese grupo.
+
+> La prevención de duplicados también tiene en cuenta el tema. Un archivo enviado al tema A todavía puede enviarse al tema B del mismo grupo.
 
 ## Paso 5 — Elegir la carpeta local
 
