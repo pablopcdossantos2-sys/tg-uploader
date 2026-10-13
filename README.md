@@ -131,6 +131,10 @@ No topo da janela, escolha:
 
 A escolha ficará salva para as próximas execuções.
 
+Por padrão, a janela principal é aberta **maximizada**, para facilitar a visualização da fila e do progresso.
+
+Os campos nos quais você precisa digitar alguma informação exibem uma dica dentro do próprio campo, com um exemplo ou indicação do valor esperado.
+
 ## Passo 2 — Informar os dados da conta
 
 Na seção **1. Conta Telegram**:
@@ -159,16 +163,36 @@ Digite o código e clique em **Confirmar**.
 
 Se sua conta possuir senha de verificação em duas etapas, outra janela aparecerá solicitando essa senha.
 
-## Passo 4 — Escolher o grupo de destino
+## Passo 4 — Escolher o grupo e, se desejar, um tópico
 
 Depois da conexão, o TG Uploader carregará os grupos disponíveis para a sua conta.
 
-Na seção **2. Destino**:
+Na seção **2. Destino — grupo e tópico**:
 
-1. Abra a lista.
+1. Abra a primeira lista.
 2. Clique no grupo para o qual deseja enviar os arquivos.
+3. Aguarde alguns instantes enquanto o programa verifica se esse grupo possui tópicos.
+
+Se o grupo **não utiliza tópicos**, o campo de tópico ficará desabilitado e mostrará que aquele grupo não possui tópicos.
+
+Se o grupo **utiliza tópicos**, a segunda lista ficará disponível. Nela você poderá escolher:
+
+- **Geral / sem tópico específico**, para enviar ao destino geral do grupo; ou
+- um tópico específico, identificado pelo nome e pelo ID.
+
+Exemplo:
+
+```text
+Avisos · 1234
+```
+
+Se você escolher um tópico específico, todos os arquivos daquela fila serão enviados para esse tópico.
+
+A fila também guarda o tópico escolhido. Portanto, se o upload for interrompido e retomado depois, os arquivos restantes continuarão sendo enviados para o **mesmo tópico original**.
 
 Sua conta precisa ter permissão para enviar arquivos nesse grupo.
+
+> A proteção contra duplicados também leva o tópico em consideração. Um arquivo já enviado ao tópico A ainda poderá ser enviado ao tópico B do mesmo grupo.
 
 ## Passo 5 — Escolher a pasta do computador
 
