@@ -1,31 +1,108 @@
 # TG Uploader
 
-Aplicativo desktop em Python para enviar arquivos de uma pasta local para um grupo do Telegram, com interface gráfica moderna, acompanhamento real do progresso e suporte a uma **versão portátil para Windows**.
+**Leia este README em outros idiomas:** [English](README.en.md) · [Español](README.es.md)
 
-> Projeto independente e não oficial. O aplicativo usa a API do Telegram por meio da biblioteca Telethon e não é afiliado ao Telegram.
+Aplicativo desktop portátil para Windows, escrito em Python, destinado ao envio de arquivos de uma pasta local para grupos do Telegram, com interface moderna, progresso real, histórico, prevenção de duplicados e retomada de filas interrompidas.
 
-## Principais recursos
+> Projeto independente e não oficial. O TG Uploader usa a API do Telegram por meio da biblioteca Telethon e não é afiliado ao Telegram.
+
+## Recursos
 
 - interface moderna com `CustomTkinter`;
-- autenticação por código de verificação e suporte a senha de duas etapas;
-- listagem dos grupos acessíveis pela conta conectada;
-- seleção de uma pasta pelo Explorador do Windows;
-- opção de incluir ou ignorar subpastas;
-- pré-visualização da fila de arquivos;
-- upload sequencial dos arquivos como documentos;
-- porcentagem real do arquivo atual usando os bytes informados pelo Telethon;
-- progresso total da pasta;
-- indicação de arquivo atual, quantidade de arquivos, bytes enviados e velocidade média;
+- idiomas **Português (Brasil)**, **English** e **Español**;
+- idioma escolhido salvo entre execuções;
+- autenticação da conta do Telegram pela própria GUI;
+- suporte a código de verificação e senha em duas etapas;
+- listagem dos grupos acessíveis pela conta;
+- seleção de uma pasta local pelo Explorador do Windows;
+- opção de incluir arquivos das subpastas;
+- pré-visualização da fila;
+- progresso real do arquivo atual;
+- progresso total da fila;
+- velocidade média de transferência;
 - cancelamento do upload;
-- sessão persistente;
-- **modo portátil**, sem instalador;
-- **execução no PC de destino sem Python**, quando usada a versão compilada;
-- build portátil por duplo clique em `build_portable.bat`;
-- build automático para Windows pelo GitHub Actions.
+- **histórico persistente de uploads**;
+- **prevenção de arquivos duplicados**;
+- **retomada de filas interrompidas**;
+- versão **portátil**, sem instalador;
+- versão compilada que não exige Python no computador de destino;
+- compilação local com `build_portable.bat`;
+- compilação automática para Windows com GitHub Actions.
+
+## Histórico de uploads
+
+O programa mantém um histórico local em:
+
+```text
+data\tg_uploader.db
+```
+
+O banco SQLite registra, entre outras informações:
+
+- data e hora;
+- grupo de destino;
+- arquivo;
+- tamanho;
+- hash SHA-256;
+- estado do envio;
+- identificador da mensagem do Telegram quando disponível.
+
+O histórico pode ser aberto diretamente pela GUI em **Ver histórico de uploads**.
+
+## Prevenção de duplicados
+
+Por padrão, a opção:
+
+**Ignorar arquivos já enviados ao mesmo grupo**
+
+fica ativada.
+
+Antes do upload, o TG Uploader calcula o **SHA-256** do arquivo e consulta o histórico.
+
+Um arquivo é considerado duplicado quando:
+
+1. possui o mesmo conteúdo, isto é, o mesmo SHA-256; e
+2. já foi enviado anteriormente para o mesmo grupo.
+
+Isso significa que apenas renomear um arquivo não faz com que ele seja reenviado.
+
+O mesmo arquivo ainda pode ser enviado normalmente para outro grupo.
+
+Se for necessário reenviar deliberadamente um arquivo idêntico para o mesmo grupo, desative a opção de prevenção de duplicados antes de criar uma nova fila.
+
+## Retomada de filas interrompidas
+
+A fila é registrada em SQLite antes do início do envio.
+
+Depois de cada arquivo, seu estado é atualizado. Portanto, se o programa for fechado, o computador for reiniciado ou a conexão falhar:
+
+- arquivos já concluídos permanecem concluídos;
+- duplicados já ignorados permanecem concluídos;
+- arquivos pendentes continuam pendentes;
+- o arquivo que estava sendo transmitido volta para o estado pendente;
+- arquivos com falha podem ser tentados novamente.
+
+Na próxima execução, o botão **Retomar fila interrompida** fica disponível quando existir uma fila recuperável.
+
+### Limitação importante
+
+A retomada ocorre **por arquivo**, e não no meio dos bytes de um arquivo.
+
+Se um arquivo de 2 GB for interrompido após 1 GB, esse arquivo específico será iniciado novamente desde o começo. Os arquivos anteriores da fila não serão reenviados.
+
+## Idiomas
+
+O idioma pode ser alterado no cabeçalho da aplicação:
+
+- Português (Brasil);
+- English;
+- Español.
+
+A preferência é gravada em `data/config.json`.
 
 ## Versão portátil
 
-A aplicação foi desenhada para que a versão compilada possa ser copiada como uma pasta independente:
+A distribuição compilada possui aproximadamente esta estrutura:
 
 ```text
 TG-Uploader/
@@ -33,120 +110,103 @@ TG-Uploader/
 ├── _internal/
 ├── data/
 ├── README.md
+├── README.en.md
+├── README.es.md
 └── PORTABLE.md
 ```
 
-Os dados persistentes são gravados em:
+A pasta inteira pode ser movida para outro diretório, HD externo ou pendrive.
 
-```text
-TG-Uploader\data
-```
-
-Portanto, a aplicação não depende de `%APPDATA%` para manter a sessão.
-
-A pasta completa pode ser movida para outro diretório, HD externo ou pendrive. O computador de destino **não precisa ter Python instalado**.
+O computador de destino **não precisa ter Python instalado**.
 
 Leia também [PORTABLE.md](PORTABLE.md).
 
-## Importante sobre segurança e portabilidade
+## Dados portáteis e segurança
 
-Para que a sessão continue funcionando ao mover a aplicação, os dados de autenticação precisam acompanhar o executável.
-
-A pasta `data/` pode conter:
+A pasta `data/` acompanha o programa e pode conter:
 
 - configurações;
-- telefone;
+- histórico e filas;
 - API ID;
 - API Hash;
-- arquivo de sessão autenticada do Telegram.
+- sessão autenticada do Telegram.
 
-Por isso:
+**Não compartilhe nem publique a pasta `data/`.**
 
-**não publique nem compartilhe a pasta `data/`.**
+Ela já está incluída no `.gitignore`.
 
-Ela já está incluída no `.gitignore` do projeto.
+Se uma cópia contendo sua sessão for perdida, revogue a sessão em:
 
-Se uma cópia portátil contendo sua sessão for perdida ou roubada, revogue essa sessão em **Telegram → Configurações → Dispositivos**.
+**Telegram → Configurações → Dispositivos**
 
-Para entregar uma cópia limpa da aplicação a outra pessoa, copie a pasta portátil e deixe a pasta `data/` vazia.
+Para entregar uma cópia limpa a outra pessoa, distribua a aplicação com a pasta `data/` vazia.
 
-## Requisitos para usar a versão portátil pronta
+## Requisitos da versão portátil pronta
 
 - Windows 10 ou Windows 11;
 - acesso à internet;
-- uma conta do Telegram que tenha acesso ao grupo de destino;
-- `api_id` e `api_hash` próprios, obtidos em <https://my.telegram.org>.
+- uma conta do Telegram com acesso ao grupo de destino;
+- `api_id` e `api_hash` próprios obtidos em <https://my.telegram.org>.
 
-Python **não é necessário** para executar uma versão portátil já compilada.
+Python não é necessário no computador que executará uma versão já compilada.
 
-## Criar as credenciais da API do Telegram
+## Criar as credenciais do Telegram
 
 1. Acesse <https://my.telegram.org>.
-2. Entre com o número da conta que será usada no TG Uploader.
+2. Entre com a conta que será usada pelo TG Uploader.
 3. Abra **API development tools**.
 4. Crie uma aplicação.
 5. Guarde **App api_id** e **App api_hash**.
 
-Nunca publique seu `api_hash`, código de verificação, senha ou arquivo de sessão.
+Nunca publique seu API Hash, código de verificação, senha ou arquivo de sessão.
 
-## Opção A — gerar a versão portátil com dois cliques
+## Gerar a versão portátil com dois cliques
 
-Esta é a forma recomendada para quem quer produzir o executável localmente.
+O computador usado para compilar precisa ter Python 3.11 ou mais recente.
 
-O computador usado **para compilar** precisa ter Python 3.11 ou mais recente instalado.
-
-Depois de baixar ou clonar o projeto, dê dois cliques em:
+Depois de baixar ou clonar o repositório, execute:
 
 ```text
 build_portable.bat
 ```
 
-O script cria sozinho um ambiente de compilação, instala as dependências e executa o PyInstaller.
-
-Ao final, a aplicação pronta estará em:
+Ao final, a aplicação estará em:
 
 ```text
 dist\TG-Uploader
 ```
 
-Copie a pasta `TG-Uploader` inteira. Não copie somente o arquivo `.exe`, porque a versão atual utiliza o formato `onedir` do PyInstaller.
+Copie a pasta `TG-Uploader` inteira.
 
-## Opção B — baixar um build gerado pelo GitHub Actions
+## Compilar pelo GitHub Actions
 
-O repositório contém o workflow:
+O workflow:
 
 ```text
 .github/workflows/build-windows.yml
 ```
 
-Ele gera o artefato:
+gera o artefato:
 
 ```text
 TG-Uploader-Windows-Portable
 ```
 
-O workflow também pode ser iniciado manualmente na aba **Actions** do GitHub.
+Ele também pode ser iniciado manualmente na aba **Actions** do GitHub.
 
-Essa abordagem permite compilar o programa na infraestrutura do GitHub sem configurar um ambiente de desenvolvimento local.
+## Executar pelo código-fonte
 
-## Opção C — executar diretamente pelo Python
-
-Para desenvolvimento ou testes, clone o projeto:
+Clone o projeto:
 
 ```powershell
 git clone https://github.com/pablopcdossantos2-sys/tg-uploader.git
 cd tg-uploader
 ```
 
-Crie um ambiente virtual:
+Crie e ative um ambiente virtual:
 
 ```powershell
 python -m venv .venv
-```
-
-Ative-o:
-
-```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
@@ -163,23 +223,21 @@ Execute:
 python main.py
 ```
 
-Mesmo nesse modo, os dados locais são armazenados na pasta `data/` na raiz do projeto. Essa pasta é ignorada pelo Git.
-
-## Primeiro acesso
+## Primeiro uso
 
 1. Abra o TG Uploader.
-2. Informe **API ID**.
-3. Informe **API Hash**.
-4. Informe o telefone no formato internacional, por exemplo `+5511999999999`.
-5. Clique em **Conectar e carregar grupos**.
-6. Digite o código enviado pelo Telegram.
-7. Caso exista verificação em duas etapas, informe a senha.
-8. Selecione o grupo de destino.
-9. Selecione a pasta local.
-10. Confira a fila.
-11. Clique em **Iniciar upload**.
-
-Depois da primeira autenticação, a sessão é mantida em `data/`, evitando a necessidade de repetir o login a cada execução, enquanto a sessão continuar válida.
+2. Escolha o idioma desejado.
+3. Informe **API ID**.
+4. Informe **API Hash**.
+5. Informe o telefone em formato internacional.
+6. Clique em **Conectar e carregar grupos**.
+7. Digite o código enviado pelo Telegram.
+8. Informe a senha em duas etapas, se aplicável.
+9. Escolha o grupo.
+10. Selecione a pasta local.
+11. Confira a fila.
+12. Mantenha ou desative a proteção contra duplicados.
+13. Clique em **Iniciar upload**.
 
 ## Estrutura do projeto
 
@@ -192,51 +250,17 @@ tg-uploader/
 ├── main.py
 ├── PORTABLE.md
 ├── README.md
+├── README.en.md
+├── README.es.md
 ├── requirements.txt
 └── src/
     ├── __init__.py
     ├── config.py
+    ├── i18n.py
+    ├── storage.py
     ├── telegram_service.py
     └── ui.py
 ```
-
-A pasta `data/` só aparece localmente depois da execução e não deve ser enviada ao GitHub.
-
-## Por que usamos uma pasta portátil em vez de somente um EXE?
-
-O programa é compilado inicialmente com o modo `onedir` do PyInstaller.
-
-Isso oferece algumas vantagens para este projeto:
-
-- inicialização mais previsível;
-- melhor compatibilidade com bibliotecas gráficas;
-- evita a extração completa da aplicação para uma pasta temporária a cada execução;
-- torna mais simples manter a pasta `data/` ao lado da aplicação;
-- continua sendo portátil: basta copiar a pasta inteira.
-
-No futuro também podemos oferecer uma variante `onefile`, mas ela não elimina a necessidade de algum armazenamento persistente para a sessão do Telegram.
-
-## Segurança
-
-- Nunca envie a pasta `data/` para o GitHub.
-- Nunca compartilhe o arquivo `telegram_session.session`.
-- Não publique o API Hash.
-- Revogue sessões desconhecidas em **Telegram → Configurações → Dispositivos**.
-- Use somente contas e grupos nos quais você tenha autorização para realizar os uploads.
-- A API do Telegram deve ser utilizada de acordo com os Termos de Serviço da plataforma.
-
-## Próximos avanços
-
-Alguns recursos previstos para evoluções futuras:
-
-- histórico de uploads;
-- identificação de arquivos já enviados;
-- retomada de filas interrompidas;
-- filtros por extensão;
-- logs de falhas;
-- checksum para reduzir reenvios acidentais;
-- empacotamento de releases assinadas;
-- atualização automática opcional.
 
 ## Referências
 
@@ -247,4 +271,4 @@ Alguns recursos previstos para evoluções futuras:
 
 ## Licença
 
-Ainda não definida. Antes de distribuir releases publicamente, escolha e adicione uma licença apropriada ao projeto.
+Ainda não definida. Antes de distribuir releases publicamente, adicione uma licença apropriada ao projeto.
