@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+.venv-build/
 venv/
 
 # Build
@@ -18,6 +19,8 @@ Thumbs.db
 
 # Local secrets / Telegram sessions
 .env
+data/
 *.session
 *.session-journal
 config.json
+secrets.json
