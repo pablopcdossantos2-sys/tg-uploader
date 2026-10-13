@@ -119,6 +119,10 @@ Use the language menu at the top of the window:
 
 The choice is saved automatically.
 
+By default, the main window opens **maximized** so the queue and progress information are easier to see.
+
+Fields that require typing display an in-field hint with an example or a description of the expected value.
+
 ## Step 2 — Enter account details
 
 Under **1. Telegram account**:
@@ -147,16 +151,36 @@ Enter the code and click **Confirm**.
 
 If your account uses two-step verification, another dialog asks for that password.
 
-## Step 4 — Choose the destination group
+## Step 4 — Choose the group and, if needed, a topic
 
 After connecting, TG Uploader loads the groups available to your account.
 
-Under **2. Destination**:
+Under **2. Destination — group and topic**:
 
-1. open the list;
-2. click the group you want.
+1. open the first list;
+2. select the destination group;
+3. wait a moment while TG Uploader checks whether that group uses topics.
+
+If the group **does not use topics**, the topic field remains disabled.
+
+If the group **uses topics**, the second list becomes available. You may choose:
+
+- **General / no specific topic**; or
+- a specific topic identified by its title and ID.
+
+Example:
+
+```text
+Announcements · 1234
+```
+
+All files in that queue are sent to the selected topic.
+
+The selected topic is saved with the queue. If the upload is interrupted and resumed later, the remaining files continue to the **same original topic**.
 
 Your account must be allowed to upload files to that group.
+
+> Duplicate prevention is also topic-aware. A file previously uploaded to topic A may still be uploaded to topic B in the same group.
 
 ## Step 5 — Choose the local folder
 
