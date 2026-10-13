@@ -11,7 +11,8 @@ from src.telegram_service import GetForumTopicsRequest
 class TelethonTopicCompatibilityTests(unittest.TestCase):
     def test_forum_topics_request_has_expected_arguments(self):
         params = inspect.signature(GetForumTopicsRequest.__init__).parameters
-        for name in ("channel", "offset_date", "offset_id", "offset_topic", "limit"):
+        self.assertTrue("channel" in params or "peer" in params)
+        for name in ("offset_date", "offset_id", "offset_topic", "limit"):
             self.assertIn(name, params)
 
     def test_send_file_supports_reply_to_for_topic_routing(self):
