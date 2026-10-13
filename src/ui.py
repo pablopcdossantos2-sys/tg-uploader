@@ -13,6 +13,7 @@ from .i18n import SUPPORTED_LANGUAGES, tr
 from .storage import HistoryEntry, QueueStore
 from .telegram_service import (
     GroupInfo,
+    TopicInfo,
     TelegramService,
     UploadCancelled,
     UploadProgress,
@@ -50,7 +51,16 @@ class InputDialog(ctk.CTkToplevel):
         ctk.CTkLabel(self, text=text, wraplength=390, justify="left").grid(
             row=0, column=0, padx=24, pady=(24, 12), sticky="ew"
         )
-        self.entry = ctk.CTkEntry(self, show="•" if secret else "", height=38)
+        placeholder = tr(
+            language,
+            "password_placeholder" if secret else "verification_placeholder",
+        )
+        self.entry = ctk.CTkEntry(
+            self,
+            show="•" if secret else "",
+            placeholder_text=placeholder,
+            height=38,
+        )
         self.entry.grid(row=1, column=0, padx=24, sticky="ew")
         self.entry.focus_set()
 
@@ -132,10 +142,14 @@ class HistoryWindow(ctk.CTkToplevel):
             "failed": "failed_status",
         }.get(entry.status, entry.status)
 
+        destination = entry.group_title
+        if entry.topic_title:
+            destination = f"{destination} › {entry.topic_title}"
+
         return (
             f"{date} | "
             f"{tr(self.language, status_key):10.10} | "
-            f"{entry.group_title[:28]:28} | "
+            f"{destination[:38]:38} | "
             f"{entry.file_name[:42]:42} | "
             f"{fmt_bytes(entry.size):>10}"
         )
@@ -154,17 +168,28 @@ class App(ctk.CTk):
         self.cancel_event = threading.Event()
         self.worker: threading.Thread | None = None
         self.groups: dict[str, GroupInfo] = {}
+        self.topics: dict[str, TopicInfo] = {}
         self.files: list[Path] = []
         self.active_job_id: str | None = None
 
         self.title(APP_TITLE)
         self.geometry("1220x800")
         self.minsize(1060, 700)
+        self.after(0, self._maximize_window)
 
         self._build()
         self._restore()
         self._refresh_resume(show_status=True)
         self.after(60, self._pump)
+
+    def _maximize_window(self):
+        try:
+            self.state("zoomed")
+        except Exception:
+            try:
+                self.attributes("-zoomed", True)
+            except Exception:
+                pass
 
     def _t(self, key: str, **kwargs) -> str:
         return tr(self.language, key, **kwargs)
@@ -238,12 +263,32 @@ class App(ctk.CTk):
         self.load_groups_btn.grid(row=5, column=0, padx=22, pady=(4, 16), sticky="ew")
 
         self._title(left, 6, self._t("destination"))
+        destination_box = ctk.CTkFrame(left, fg_color="transparent")
+        destination_box.grid(row=7, column=0, padx=22, pady=(6, 16), sticky="ew")
+        destination_box.grid_columnconfigure(0, weight=1)
+
         self.group_menu = ctk.CTkOptionMenu(
-            left,
+            destination_box,
             values=[self._t("connect_first")],
             height=38,
+            command=self._group_changed,
         )
-        self.group_menu.grid(row=7, column=0, padx=22, pady=(6, 16), sticky="ew")
+        self.group_menu.grid(row=0, column=0, sticky="ew")
+
+        ctk.CTkLabel(
+            destination_box,
+            text=self._t("topic_label"),
+            anchor="w",
+            text_color=("gray40", "gray65"),
+        ).grid(row=1, column=0, pady=(10, 4), sticky="ew")
+
+        self.topic_menu = ctk.CTkOptionMenu(
+            destination_box,
+            values=[self._t("no_topics_group")],
+            height=38,
+            state="disabled",
+        )
+        self.topic_menu.grid(row=2, column=0, sticky="ew")
 
         self._title(left, 8, self._t("local_folder"))
         picker = ctk.CTkFrame(left, fg_color="transparent")
@@ -515,7 +560,17 @@ class App(ctk.CTk):
             self._scan()
 
     def _scan(self):
-        root = Path(self.folder.get().strip())
+        folder_text = self.folder.get().strip()
+        if not folder_text:
+            self.files = []
+            self.queue_title.configure(text=self._t("files_found", count=0))
+            self.file_list.configure(state="normal")
+            self.file_list.delete("1.0", "end")
+            self.file_list.configure(state="disabled")
+            self._save()
+            return
+
+        root = Path(folder_text)
         if not root.is_dir():
             self.files = []
         else:
@@ -578,6 +633,75 @@ class App(ctk.CTk):
         values = list(self.groups) or [self._t("no_groups")]
         self.group_menu.configure(values=values)
         self.group_menu.set(values[0])
+        self.topics = {}
+        self.topic_menu.configure(
+            values=[self._t("no_topics_group")],
+            state="disabled",
+        )
+        self.topic_menu.set(self._t("no_topics_group"))
+
+    def _group_changed(self, _value: str | None = None):
+        selected = self.groups.get(self.group_menu.get())
+        self.topics = {}
+
+        if not selected:
+            self.topic_menu.configure(
+                values=[self._t("no_topics_group")],
+                state="disabled",
+            )
+            self.topic_menu.set(self._t("no_topics_group"))
+            return
+
+        if not selected.has_topics:
+            self.topic_menu.configure(
+                values=[self._t("no_topics_group")],
+                state="disabled",
+            )
+            self.topic_menu.set(self._t("no_topics_group"))
+            return
+
+        self.topic_menu.configure(
+            values=[self._t("general_topic")],
+            state="disabled",
+        )
+        self.topic_menu.set(self._t("general_topic"))
+
+        if self._working():
+            self.after(120, self._group_changed)
+            return
+
+        try:
+            service = self._service()
+        except ValueError as exc:
+            messagebox.showerror(APP_TITLE, str(exc))
+            return
+
+        group_id = selected.id
+        self._busy(True, self._t("loading_topics"))
+
+        def work():
+            try:
+                topics = service.list_topics(group_id)
+                self.events.put(("topics", (group_id, topics)))
+            except Exception as exc:
+                self.events.put(("topic_error", (group_id, str(exc))))
+
+        self._thread(work)
+
+    def _set_topics(self, group_id: int, topics):
+        selected = self.groups.get(self.group_menu.get())
+        if not selected or selected.id != group_id:
+            return
+
+        topic_list = list(topics)
+        self.topics = {f"{t.title}  ·  {t.id}": t for t in topic_list}
+        values = [self._t("general_topic"), *self.topics.keys()]
+        self.topic_menu.configure(values=values, state="normal")
+        self.topic_menu.set(values[0])
+        self.status.configure(text=self._t("topics_loaded", count=len(topic_list)))
+
+    def _destination_name(self, group_title: str, topic_title: str | None) -> str:
+        return group_title if not topic_title else f"{group_title} › {topic_title}"
 
     def _start(self):
         if self._working():
@@ -590,6 +714,7 @@ class App(ctk.CTk):
 
         self._scan()
         selected = self.groups.get(self.group_menu.get())
+        selected_topic = self.topics.get(self.topic_menu.get())
         if not self.files:
             messagebox.showwarning(APP_TITLE, self._t("no_files_warning"))
             return
@@ -605,6 +730,8 @@ class App(ctk.CTk):
             selected.id,
             selected.title,
             bool(self.recursive.get()),
+            topic_id=selected_topic.id if selected_topic else None,
+            topic_title=selected_topic.title if selected_topic else None,
         )
         self._show_job_queue(job_id)
         self._run_job(job_id, service, self._t("preparing"))
@@ -619,9 +746,10 @@ class App(ctk.CTk):
             self._refresh_resume(show_status=False)
             return
 
+        destination = self._destination_name(job.group_title, job.topic_title)
         if not messagebox.askyesno(
             self._t("resume_confirm_title"),
-            self._t("resume_confirm_text", group=job.group_title),
+            self._t("resume_confirm_text", group=destination),
         ):
             return
 
@@ -636,7 +764,7 @@ class App(ctk.CTk):
         self._run_job(
             job.id,
             service,
-            self._t("resume_started", group=job.group_title),
+            self._t("resume_started", group=destination),
         )
 
     def _run_job(self, job_id: str, service: TelegramService, initial_status: str):
@@ -688,6 +816,14 @@ class App(ctk.CTk):
         self.start_btn.configure(state=state)
         self.history_btn.configure(state=state)
         self.language_menu.configure(state=state)
+        self.group_menu.configure(state=state)
+        if busy:
+            self.topic_menu.configure(state="disabled")
+        else:
+            selected = self.groups.get(self.group_menu.get())
+            self.topic_menu.configure(
+                state="normal" if selected and selected.has_topics else "disabled"
+            )
         self.resume_btn.configure(
             state="disabled" if busy else ("normal" if self.store.latest_resumable_job() else "disabled")
         )
@@ -730,7 +866,7 @@ class App(ctk.CTk):
                         "resume_available",
                         done=job.done_files,
                         total=job.total_files,
-                        group=job.group_title,
+                        group=self._destination_name(job.group_title, job.topic_title),
                     )
                 )
         else:
@@ -766,6 +902,24 @@ class App(ctk.CTk):
                 elif event == "groups":
                     self._set_groups(data)
                     self.status.configure(text=self._t("connected", count=len(self.groups)))
+                    self.after(120, self._group_changed)
+
+                elif event == "topics":
+                    group_id, topics = data
+                    self._set_topics(group_id, topics)
+
+                elif event == "topic_error":
+                    group_id, error = data
+                    selected = self.groups.get(self.group_menu.get())
+                    if selected and selected.id == group_id:
+                        self.topic_menu.configure(
+                            values=[self._t("general_topic")],
+                            state="normal",
+                        )
+                        self.topic_menu.set(self._t("general_topic"))
+                        self.status.configure(
+                            text=self._t("topic_load_error", error=error)
+                        )
 
                 elif event == "progress":
                     self._show_progress(data)
