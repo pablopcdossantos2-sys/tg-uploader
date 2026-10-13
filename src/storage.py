@@ -146,7 +146,7 @@ class QueueStore:
 
     def recover_interrupted_jobs(self) -> None:
         now = utc_now()
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 "UPDATE upload_items SET status='pending', error=NULL "
                 "WHERE status='uploading'"
@@ -169,7 +169,7 @@ class QueueStore:
         job_id = uuid.uuid4().hex
         now = utc_now()
         total_bytes = sum(p.stat().st_size for p in paths)
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 """
                 INSERT INTO upload_jobs
@@ -277,7 +277,7 @@ class QueueStore:
 
     def start_job(self, job_id: str) -> None:
         now = utc_now()
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 "UPDATE upload_items SET status='pending', error=NULL "
                 "WHERE job_id=? AND status='failed'",
@@ -289,14 +289,14 @@ class QueueStore:
             )
 
     def mark_item_uploading(self, item_id: int) -> None:
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 "UPDATE upload_items SET status='uploading', started_at=?, error=NULL WHERE id=?",
                 (utc_now(), item_id),
             )
 
     def update_item_fingerprint(self, item_id: int, size: int, sha256: str) -> None:
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 "UPDATE upload_items SET size=?, sha256=? WHERE id=?",
                 (int(size), sha256, item_id),
@@ -350,7 +350,7 @@ class QueueStore:
         message_id: int | None,
     ) -> None:
         now = utc_now()
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 """
                 UPDATE upload_items
@@ -373,7 +373,7 @@ class QueueStore:
         sha256: str,
     ) -> None:
         now = utc_now()
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 """
                 UPDATE upload_items
@@ -394,7 +394,7 @@ class QueueStore:
         group_title: str,
         error: str,
     ) -> None:
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 "UPDATE upload_items SET status='failed', error=? WHERE id=?",
                 (error[:2000], item.id),
@@ -405,7 +405,7 @@ class QueueStore:
             )
 
     def mark_item_pending(self, item_id: int) -> None:
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 "UPDATE upload_items SET status='pending' WHERE id=?",
                 (item_id,),
@@ -416,7 +416,7 @@ class QueueStore:
         if not summary:
             return None
         status = "needs_attention" if summary.failed_files else "completed"
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 "UPDATE upload_jobs SET status=?, updated_at=? WHERE id=?",
                 (status, utc_now(), job_id),
@@ -424,7 +424,7 @@ class QueueStore:
         return self.get_job(job_id)
 
     def interrupt_job(self, job_id: str) -> None:
-        with self._write_lock, self._connect() as conn:
+        with self._write_lock, self._connection() as conn:
             conn.execute(
                 "UPDATE upload_items SET status='pending' WHERE job_id=? AND status='uploading'",
                 (job_id,),
