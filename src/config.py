@@ -9,11 +9,7 @@ APP_NAME = "TGUploader"
 
 
 def app_root_dir() -> Path:
-    """Return the folder that owns the portable application.
-
-    In a PyInstaller build this is the folder containing TG-Uploader.exe.
-    When running from source it is the repository root.
-    """
+    """Return the folder that owns the portable application."""
     if getattr(sys, "frozen", False):
         return Path(sys.executable).resolve().parent
     return Path(__file__).resolve().parents[1]
@@ -39,6 +35,8 @@ class AppConfig:
     last_folder: str = ""
     recursive: bool = True
     theme: str = "System"
+    language: str = "pt-BR"
+    skip_duplicates: bool = True
 
 
 def _read_json(path: Path) -> dict:
@@ -65,9 +63,14 @@ def load_config() -> AppConfig:
     data = _read_json(CONFIG_PATH)
     allowed = {field for field in AppConfig.__dataclass_fields__}
     try:
-        return AppConfig(**{k: v for k, v in data.items() if k in allowed})
+        config = AppConfig(**{k: v for k, v in data.items() if k in allowed})
     except TypeError:
         return AppConfig()
+    if config.language not in {"pt-BR", "en", "es"}:
+        config.language = "pt-BR"
+    if config.theme not in {"System", "Dark", "Light"}:
+        config.theme = "System"
+    return config
 
 
 def save_config(config: AppConfig) -> None:
