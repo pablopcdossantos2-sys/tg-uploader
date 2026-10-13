@@ -158,6 +158,12 @@ En **1. Cuenta de Telegram**:
 2. pegue el **API Hash**;
 3. escriba el teléfono en formato internacional.
 
+Después de introducir **API ID** y **API Hash** por primera vez, TG Uploader los guarda localmente. La próxima vez que abra la aplicación, esos campos se rellenarán automáticamente y no tendrá que escribirlos de nuevo.
+
+El **API ID** se guarda en `data/config.json` y el **API Hash** en `data/secrets.json`. Estos archivos pertenecen a su copia portátil de la aplicación.
+
+> Si elimina el contenido de la carpeta `data/` o utiliza una copia limpia de TG Uploader, tendrá que introducir las credenciales nuevamente.
+
 Ejemplo:
 
 ```text
