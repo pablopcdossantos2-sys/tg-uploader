@@ -10,6 +10,8 @@ on:
       - "src/**"
       - "requirements.txt"
       - "build_portable.bat"
+      - "README*.md"
+      - "PORTABLE.md"
       - ".github/workflows/build-windows.yml"
 
 jobs:
@@ -31,12 +33,19 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt "pyinstaller>=6.10,<7"
 
+      - name: Validate Python source
+        shell: pwsh
+        run: |
+          python -m compileall -q main.py src
+
       - name: Build portable application
         shell: pwsh
         run: |
           python -m PyInstaller --noconfirm --clean --windowed --onedir --name "TG-Uploader" --collect-all customtkinter --collect-submodules telethon main.py
           New-Item -ItemType Directory -Force -Path "dist/TG-Uploader/data" | Out-Null
           Copy-Item README.md "dist/TG-Uploader/README.md"
+          Copy-Item README.en.md "dist/TG-Uploader/README.en.md"
+          Copy-Item README.es.md "dist/TG-Uploader/README.es.md"
           Copy-Item PORTABLE.md "dist/TG-Uploader/PORTABLE.md"
 
       - name: Upload portable artifact
