@@ -4,6 +4,7 @@ import hashlib
 import sqlite3
 import threading
 import uuid
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -72,9 +73,21 @@ class QueueStore:
         conn.execute("PRAGMA foreign_keys = ON")
         return conn
 
+    @contextmanager
+    def _connection(self):
+        conn = self._connect()
+        try:
+            yield conn
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+
     def _init_schema(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        with self._connect() as conn:
+        with self._connection() as conn:
             conn.execute("PRAGMA journal_mode = WAL")
             conn.executescript(
                 """
@@ -186,7 +199,7 @@ class QueueStore:
         return job_id
 
     def get_job(self, job_id: str) -> JobSummary | None:
-        with self._connect() as conn:
+        with self._connection() as conn:
             row = conn.execute(
                 """
                 SELECT j.*,
@@ -221,7 +234,7 @@ class QueueStore:
         )
 
     def latest_resumable_job(self) -> JobSummary | None:
-        with self._connect() as conn:
+        with self._connection() as conn:
             row = conn.execute(
                 """
                 SELECT j.id
@@ -238,7 +251,7 @@ class QueueStore:
         return self.get_job(row["id"]) if row else None
 
     def items_for_job(self, job_id: str) -> list[QueueItem]:
-        with self._connect() as conn:
+        with self._connection() as conn:
             rows = conn.execute(
                 """
                 SELECT id, job_id, position, path, relative_path, size, status, sha256, error
@@ -291,7 +304,7 @@ class QueueStore:
             )
 
     def is_duplicate(self, group_id: int, sha256: str) -> bool:
-        with self._connect() as conn:
+        with self._connection() as conn:
             row = conn.execute(
                 """
                 SELECT 1 FROM upload_history
@@ -423,7 +436,7 @@ class QueueStore:
             )
 
     def history(self, limit: int = 300) -> list[HistoryEntry]:
-        with self._connect() as conn:
+        with self._connection() as conn:
             rows = conn.execute(
                 """
                 SELECT occurred_at, status, group_title, file_name, path, size, sha256, message_id
