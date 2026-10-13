@@ -158,6 +158,12 @@ Under **1. Telegram account**:
 2. paste the **API Hash**;
 3. enter your phone number in international format.
 
+After you enter **API ID** and **API Hash** for the first time, TG Uploader saves them locally. The next time the application opens, those fields are filled automatically, so you do not need to enter them again.
+
+The **API ID** is stored in `data/config.json` and the **API Hash** in `data/secrets.json`. These files belong to your portable copy of the application.
+
+> If you delete the contents of the `data/` folder or use a clean copy of TG Uploader, you will need to enter the credentials again.
+
 Example:
 
 ```text
