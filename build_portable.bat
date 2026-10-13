@@ -24,22 +24,26 @@ if not %errorlevel%==0 (
 )
 
 if not exist ".venv-build\Scripts\python.exe" (
-    echo [1/5] Criando ambiente de compilacao...
+    echo [1/6] Criando ambiente de compilacao...
     %PYTHON% -m venv .venv-build
     if not %errorlevel%==0 goto :error
 )
 
 set "VPY=.venv-build\Scripts\python.exe"
 
-echo [2/5] Atualizando ferramentas...
+echo [2/6] Atualizando ferramentas...
 "%VPY%" -m pip install --upgrade pip
 if not %errorlevel%==0 goto :error
 
-echo [3/5] Instalando dependencias...
+echo [3/6] Instalando dependencias...
 "%VPY%" -m pip install -r requirements.txt "pyinstaller>=6.10,<7"
 if not %errorlevel%==0 goto :error
 
-echo [4/5] Gerando a versao portatil...
+echo [4/6] Verificando o codigo Python...
+"%VPY%" -m compileall -q main.py src
+if not %errorlevel%==0 goto :error
+
+echo [5/6] Gerando a versao portatil...
 "%VPY%" -m PyInstaller ^
   --noconfirm ^
   --clean ^
@@ -51,9 +55,11 @@ echo [4/5] Gerando a versao portatil...
   main.py
 if not %errorlevel%==0 goto :error
 
-echo [5/5] Preparando a pasta final...
+echo [6/6] Preparando a pasta final...
 if not exist "dist\TG-Uploader\data" mkdir "dist\TG-Uploader\data"
 copy /Y "README.md" "dist\TG-Uploader\README.md" >nul
+copy /Y "README.en.md" "dist\TG-Uploader\README.en.md" >nul
+copy /Y "README.es.md" "dist\TG-Uploader\README.es.md" >nul
 copy /Y "PORTABLE.md" "dist\TG-Uploader\PORTABLE.md" >nul
 
 echo.
