@@ -88,7 +88,6 @@ class QueueStore:
     def _init_schema(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self._connection() as conn:
-            conn.execute("PRAGMA journal_mode = WAL")
             conn.executescript(
                 """
                 CREATE TABLE IF NOT EXISTS upload_jobs (
