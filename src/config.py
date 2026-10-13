@@ -1,27 +1,35 @@
 from __future__ import annotations
 
 import json
-import os
+import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
 APP_NAME = "TGUploader"
-KEYRING_SERVICE = "TGUploader"
-KEYRING_API_HASH_KEY = "telegram_api_hash"
+
+
+def app_root_dir() -> Path:
+    """Return the folder that owns the portable application.
+
+    In a PyInstaller build this is the folder containing TG-Uploader.exe.
+    When running from source it is the repository root.
+    """
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parents[1]
 
 
 def app_data_dir() -> Path:
-    if os.name == "nt":
-        base = Path(os.environ.get("APPDATA", Path.home()))
-    else:
-        base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
-    path = base / APP_NAME
+    """Return a persistent data folder beside the portable application."""
+    path = app_root_dir() / "data"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
 
-CONFIG_PATH = app_data_dir() / "config.json"
-SESSION_PATH = app_data_dir() / "telegram_session"
+DATA_DIR = app_data_dir()
+CONFIG_PATH = DATA_DIR / "config.json"
+SECRETS_PATH = DATA_DIR / "secrets.json"
+SESSION_PATH = DATA_DIR / "telegram_session"
 
 
 @dataclass
@@ -33,44 +41,50 @@ class AppConfig:
     theme: str = "System"
 
 
-def load_config() -> AppConfig:
-    if not CONFIG_PATH.exists():
-        return AppConfig()
+def _read_json(path: Path) -> dict:
+    if not path.exists():
+        return {}
     try:
-        data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-        allowed = {field for field in AppConfig.__dataclass_fields__}
-        return AppConfig(**{k: v for k, v in data.items() if k in allowed})
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) else {}
     except (OSError, json.JSONDecodeError, TypeError):
+        return {}
+
+
+def _write_json(path: Path, data: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_suffix(path.suffix + ".tmp")
+    temp.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    temp.replace(path)
+
+
+def load_config() -> AppConfig:
+    data = _read_json(CONFIG_PATH)
+    allowed = {field for field in AppConfig.__dataclass_fields__}
+    try:
+        return AppConfig(**{k: v for k, v in data.items() if k in allowed})
+    except TypeError:
         return AppConfig()
 
 
 def save_config(config: AppConfig) -> None:
-    CONFIG_PATH.write_text(
-        json.dumps(asdict(config), ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    _write_json(CONFIG_PATH, asdict(config))
 
 
 def load_api_hash() -> str:
-    try:
-        import keyring
-
-        return keyring.get_password(KEYRING_SERVICE, KEYRING_API_HASH_KEY) or ""
-    except Exception:
-        return ""
+    value = _read_json(SECRETS_PATH).get("telegram_api_hash", "")
+    return value if isinstance(value, str) else ""
 
 
 def save_api_hash(api_hash: str) -> bool:
     try:
-        import keyring
-
         if api_hash:
-            keyring.set_password(KEYRING_SERVICE, KEYRING_API_HASH_KEY, api_hash)
-        else:
-            try:
-                keyring.delete_password(KEYRING_SERVICE, KEYRING_API_HASH_KEY)
-            except Exception:
-                pass
+            _write_json(SECRETS_PATH, {"telegram_api_hash": api_hash})
+        elif SECRETS_PATH.exists():
+            SECRETS_PATH.unlink()
         return True
-    except Exception:
+    except OSError:
         return False
