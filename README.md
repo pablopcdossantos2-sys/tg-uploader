@@ -200,6 +200,22 @@ Se sua conta possuir senha de verificação em duas etapas, outra janela aparece
 
 Depois da conexão, o TG Uploader carregará os grupos disponíveis para a sua conta.
 
+A lista foi pensada para evitar confusão com identificadores internos do Telegram. Sempre que possível, cada destino aparece como:
+
+```text
+Nome do grupo · Tipo · @username
+```
+
+Exemplo:
+
+```text
+Equipe de Projetos · Fórum · @equipeprojetos
+```
+
+Se o grupo não possuir `@username`, o programa poderá mostrar um **ID técnico**. Esse número serve apenas para diferenciar entidades do Telegram com nomes iguais; você não precisa interpretar o código para decidir o destino.
+
+Grupos antigos que foram migrados pelo Telegram para supergrupos são ignorados na lista, para evitar que o mesmo nome apareça duas vezes por causa da entidade antiga e da nova.
+
 Na seção **2. Destino — grupo e tópico**:
 
 1. Abra a primeira lista.
