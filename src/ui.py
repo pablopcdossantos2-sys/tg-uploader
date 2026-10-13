@@ -643,6 +643,7 @@ class App(ctk.CTk):
         self.active_job_id = job_id
         self.cancel_event.clear()
         self._reset_progress()
+        skip_duplicates = bool(self.skip_duplicates.get())
         self._busy(True, initial_status, uploading=True)
 
         def work():
@@ -650,7 +651,7 @@ class App(ctk.CTk):
                 store=self.store,
                 job_id=job_id,
                 cancel_event=self.cancel_event,
-                skip_duplicates=bool(self.skip_duplicates.get()),
+                skip_duplicates=skip_duplicates,
                 on_progress=lambda p: self.events.put(("progress", p)),
                 on_status=lambda s: self.events.put(("status", s)),
             )
