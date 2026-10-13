@@ -10,6 +10,11 @@ from typing import Callable
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 
+try:
+    from telethon.tl.functions.channels import GetForumTopicsRequest
+except ImportError:
+    from telethon.tl.functions.messages import GetForumTopicsRequest
+
 from .config import SESSION_PATH
 from .i18n import tr
 from .storage import QueueItem, QueueStore, sha256_file
@@ -21,6 +26,13 @@ class UploadCancelled(Exception):
 
 @dataclass(frozen=True)
 class GroupInfo:
+    id: int
+    title: str
+    has_topics: bool = False
+
+
+@dataclass(frozen=True)
+class TopicInfo:
     id: int
     title: str
 
@@ -123,6 +135,7 @@ class TelegramService:
                         GroupInfo(
                             id=int(dialog.id),
                             title=dialog.name or str(dialog.id),
+                            has_topics=bool(getattr(dialog.entity, "forum", False)),
                         )
                     )
             groups.sort(key=lambda item: item.title.casefold())
@@ -132,6 +145,71 @@ class TelegramService:
 
     def list_groups(self) -> list[GroupInfo]:
         return asyncio.run(self.list_groups_async())
+
+    async def list_topics_async(self, group_id: int) -> list[TopicInfo]:
+        client = self._client()
+        try:
+            await self._ensure_authorized(client)
+            entity = await client.get_entity(group_id)
+            if not bool(getattr(entity, "forum", False)):
+                return []
+
+            topics: list[TopicInfo] = []
+            seen: set[int] = set()
+            offset_date = 0
+            offset_id = 0
+            offset_topic = 0
+
+            while True:
+                result = await client(
+                    GetForumTopicsRequest(
+                        channel=entity,
+                        offset_date=offset_date,
+                        offset_id=offset_id,
+                        offset_topic=offset_topic,
+                        limit=100,
+                    )
+                )
+                page = [
+                    topic
+                    for topic in getattr(result, "topics", [])
+                    if getattr(topic, "id", None) is not None
+                    and getattr(topic, "title", None)
+                ]
+                if not page:
+                    break
+
+                for topic in page:
+                    topic_id = int(topic.id)
+                    if topic_id not in seen:
+                        seen.add(topic_id)
+                        topics.append(TopicInfo(id=topic_id, title=str(topic.title)))
+
+                total = int(getattr(result, "count", len(topics)) or len(topics))
+                if len(topics) >= total:
+                    break
+
+                last = page[-1]
+                next_topic = int(getattr(last, "id", 0) or 0)
+                next_id = int(getattr(last, "top_message", 0) or 0)
+                if next_topic == offset_topic and next_id == offset_id:
+                    break
+
+                offset_topic = next_topic
+                offset_id = next_id
+                offset_date = 0
+                for message in getattr(result, "messages", []):
+                    if int(getattr(message, "id", 0) or 0) == offset_id:
+                        offset_date = getattr(message, "date", 0) or 0
+                        break
+
+            topics.sort(key=lambda item: item.title.casefold())
+            return topics
+        finally:
+            await client.disconnect()
+
+    def list_topics(self, group_id: int) -> list[TopicInfo]:
+        return asyncio.run(self.list_topics_async(group_id))
 
     async def upload_job_async(
         self,
@@ -186,6 +264,8 @@ class TelegramService:
                         item,
                         job.group_id,
                         job.group_title,
+                        job.topic_id,
+                        job.topic_title,
                         self._t("file_missing", path=str(item.path)),
                     )
                     continue
@@ -206,11 +286,17 @@ class TelegramService:
                     store.mark_item_pending(item.id)
                     raise UploadCancelled(self._t("upload_cancelled"))
 
-                if skip_duplicates and store.is_duplicate(job.group_id, checksum):
+                if skip_duplicates and store.is_duplicate(
+                    job.group_id,
+                    checksum,
+                    topic_id=job.topic_id,
+                ):
                     store.mark_item_skipped(
                         item,
                         job.group_id,
                         job.group_title,
+                        job.topic_id,
+                        job.topic_title,
                         file_total,
                         checksum,
                     )
@@ -264,12 +350,15 @@ class TelegramService:
                         str(item.path),
                         force_document=True,
                         progress_callback=progress_callback,
+                        reply_to=job.topic_id,
                     )
                     message_id = getattr(message, "id", None)
                     store.mark_item_completed(
                         item,
                         job.group_id,
                         job.group_title,
+                        job.topic_id,
+                        job.topic_title,
                         file_total,
                         checksum,
                         int(message_id) if message_id is not None else None,
@@ -297,6 +386,8 @@ class TelegramService:
                         item,
                         job.group_id,
                         job.group_title,
+                        job.topic_id,
+                        job.topic_title,
                         str(exc),
                     )
 
