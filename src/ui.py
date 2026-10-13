@@ -179,6 +179,8 @@ class App(ctk.CTk):
 
         self._build()
         self._restore()
+        self._bind_persistent_fields()
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
         self._refresh_resume(show_status=True)
         self.after(60, self._pump)
 
@@ -479,6 +481,16 @@ class App(ctk.CTk):
         if self.cfg.last_folder:
             self._scan()
 
+    def _bind_persistent_fields(self):
+        for widget in (self.api_id, self.api_hash, self.phone, self.folder):
+            widget.bind("<FocusOut>", lambda _event: self._save(), add="+")
+
+    def _on_close(self):
+        self._save()
+        if self._working():
+            self.cancel_event.set()
+        self.destroy()
+
     def _save(self):
         if not hasattr(self, "api_id"):
             return
@@ -516,6 +528,7 @@ class App(ctk.CTk):
 
         self._build()
         self._restore()
+        self._bind_persistent_fields()
         self._refresh_resume(show_status=False)
 
     def _theme_changed(self, label: str):
