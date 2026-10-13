@@ -163,11 +163,11 @@ class TelegramService:
             while True:
                 result = await client(
                     GetForumTopicsRequest(
-                        channel=entity,
-                        offset_date=offset_date,
-                        offset_id=offset_id,
-                        offset_topic=offset_topic,
-                        limit=100,
+                        entity,
+                        offset_date,
+                        offset_id,
+                        offset_topic,
+                        100,
                     )
                 )
                 page = [
