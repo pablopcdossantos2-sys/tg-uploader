@@ -37,6 +37,8 @@ class JobSummary:
     id: str
     group_id: int
     group_title: str
+    topic_id: int | None
+    topic_title: str | None
     source_folder: str
     status: str
     total_files: int
@@ -53,6 +55,7 @@ class HistoryEntry:
     occurred_at: str
     status: str
     group_title: str
+    topic_title: str | None
     file_name: str
     path: str
     size: int
@@ -96,6 +99,8 @@ class QueueStore:
                     updated_at TEXT NOT NULL,
                     group_id INTEGER NOT NULL,
                     group_title TEXT NOT NULL,
+                    topic_id INTEGER,
+                    topic_title TEXT,
                     source_folder TEXT NOT NULL,
                     recursive INTEGER NOT NULL DEFAULT 1,
                     status TEXT NOT NULL,
@@ -125,6 +130,8 @@ class QueueStore:
                     status TEXT NOT NULL,
                     group_id INTEGER NOT NULL,
                     group_title TEXT NOT NULL,
+                    topic_id INTEGER,
+                    topic_title TEXT,
                     job_id TEXT,
                     item_id INTEGER,
                     path TEXT NOT NULL,
@@ -141,8 +148,28 @@ class QueueStore:
                     ON upload_history(group_id, sha256, status);
                 CREATE INDEX IF NOT EXISTS idx_history_time
                     ON upload_history(occurred_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_history_duplicate_topic
+                    ON upload_history(group_id, topic_id, sha256, status);
                 """
             )
+            self._ensure_column(conn, "upload_jobs", "topic_id", "INTEGER")
+            self._ensure_column(conn, "upload_jobs", "topic_title", "TEXT")
+            self._ensure_column(conn, "upload_history", "topic_id", "INTEGER")
+            self._ensure_column(conn, "upload_history", "topic_title", "TEXT")
+
+    @staticmethod
+    def _ensure_column(
+        conn: sqlite3.Connection,
+        table: str,
+        column: str,
+        definition: str,
+    ) -> None:
+        existing = {
+            row["name"]
+            for row in conn.execute(f"PRAGMA table_info({table})").fetchall()
+        }
+        if column not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
     def recover_interrupted_jobs(self) -> None:
         now = utc_now()
@@ -164,6 +191,8 @@ class QueueStore:
         group_id: int,
         group_title: str,
         recursive: bool,
+        topic_id: int | None = None,
+        topic_title: str | None = None,
     ) -> str:
         paths = [Path(p).resolve() for p in files]
         job_id = uuid.uuid4().hex
@@ -173,13 +202,14 @@ class QueueStore:
             conn.execute(
                 """
                 INSERT INTO upload_jobs
-                    (id, created_at, updated_at, group_id, group_title, source_folder,
-                     recursive, status, total_files, total_bytes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+                    (id, created_at, updated_at, group_id, group_title, topic_id, topic_title,
+                     source_folder, recursive, status, total_files, total_bytes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
                 """,
                 (
-                    job_id, now, now, int(group_id), group_title, str(source_folder.resolve()),
-                    int(recursive), len(paths), total_bytes,
+                    job_id, now, now, int(group_id), group_title,
+                    int(topic_id) if topic_id is not None else None, topic_title,
+                    str(source_folder.resolve()), int(recursive), len(paths), total_bytes,
                 ),
             )
             for position, path in enumerate(paths, start=1):
@@ -221,6 +251,8 @@ class QueueStore:
             id=row["id"],
             group_id=int(row["group_id"]),
             group_title=row["group_title"],
+            topic_id=int(row["topic_id"]) if row["topic_id"] is not None else None,
+            topic_title=row["topic_title"],
             source_folder=row["source_folder"],
             status=row["status"],
             total_files=int(row["total_files"]),
@@ -302,15 +334,27 @@ class QueueStore:
                 (int(size), sha256, item_id),
             )
 
-    def is_duplicate(self, group_id: int, sha256: str) -> bool:
+    def is_duplicate(
+        self,
+        group_id: int,
+        sha256: str,
+        topic_id: int | None = None,
+    ) -> bool:
         with self._connection() as conn:
             row = conn.execute(
                 """
                 SELECT 1 FROM upload_history
-                WHERE group_id=? AND sha256=? AND status='uploaded'
+                WHERE group_id=?
+                  AND COALESCE(topic_id, -1)=COALESCE(?, -1)
+                  AND sha256=?
+                  AND status='uploaded'
                 LIMIT 1
                 """,
-                (int(group_id), sha256),
+                (
+                    int(group_id),
+                    int(topic_id) if topic_id is not None else None,
+                    sha256,
+                ),
             ).fetchone()
         return row is not None
 
@@ -321,6 +365,8 @@ class QueueStore:
         status: str,
         group_id: int,
         group_title: str,
+        topic_id: int | None,
+        topic_title: str | None,
         item: QueueItem,
         size: int,
         sha256: str | None,
@@ -330,13 +376,15 @@ class QueueStore:
         conn.execute(
             """
             INSERT INTO upload_history
-                (occurred_at, status, group_id, group_title, job_id, item_id, path,
-                 file_name, size, sha256, message_id, note)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (occurred_at, status, group_id, group_title, topic_id, topic_title,
+                 job_id, item_id, path, file_name, size, sha256, message_id, note)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                utc_now(), status, int(group_id), group_title, item.job_id, item.id,
-                str(item.path), item.path.name, int(size), sha256, message_id, note,
+                utc_now(), status, int(group_id), group_title,
+                int(topic_id) if topic_id is not None else None, topic_title,
+                item.job_id, item.id, str(item.path), item.path.name,
+                int(size), sha256, message_id, note,
             ),
         )
 
@@ -345,6 +393,8 @@ class QueueStore:
         item: QueueItem,
         group_id: int,
         group_title: str,
+        topic_id: int | None,
+        topic_title: str | None,
         size: int,
         sha256: str,
         message_id: int | None,
@@ -361,6 +411,7 @@ class QueueStore:
             )
             self._history_insert(
                 conn, status="uploaded", group_id=group_id, group_title=group_title,
+                topic_id=topic_id, topic_title=topic_title,
                 item=item, size=size, sha256=sha256, message_id=message_id,
             )
 
@@ -369,6 +420,8 @@ class QueueStore:
         item: QueueItem,
         group_id: int,
         group_title: str,
+        topic_id: int | None,
+        topic_title: str | None,
         size: int,
         sha256: str,
     ) -> None:
@@ -384,6 +437,7 @@ class QueueStore:
             )
             self._history_insert(
                 conn, status="skipped_duplicate", group_id=group_id, group_title=group_title,
+                topic_id=topic_id, topic_title=topic_title,
                 item=item, size=size, sha256=sha256, note="duplicate",
             )
 
@@ -392,6 +446,8 @@ class QueueStore:
         item: QueueItem,
         group_id: int,
         group_title: str,
+        topic_id: int | None,
+        topic_title: str | None,
         error: str,
     ) -> None:
         with self._write_lock, self._connection() as conn:
@@ -401,6 +457,7 @@ class QueueStore:
             )
             self._history_insert(
                 conn, status="failed", group_id=group_id, group_title=group_title,
+                topic_id=topic_id, topic_title=topic_title,
                 item=item, size=item.size, sha256=item.sha256, note=error[:2000],
             )
 
@@ -438,7 +495,7 @@ class QueueStore:
         with self._connection() as conn:
             rows = conn.execute(
                 """
-                SELECT occurred_at, status, group_title, file_name, path, size, sha256, message_id
+                SELECT occurred_at, status, group_title, topic_title, file_name, path, size, sha256, message_id
                 FROM upload_history
                 ORDER BY id DESC
                 LIMIT ?
@@ -450,6 +507,7 @@ class QueueStore:
                 occurred_at=r["occurred_at"],
                 status=r["status"],
                 group_title=r["group_title"],
+                topic_title=r["topic_title"],
                 file_name=r["file_name"],
                 path=r["path"],
                 size=int(r["size"]),
