@@ -29,6 +29,8 @@ class GroupInfo:
     id: int
     title: str
     has_topics: bool = False
+    username: str | None = None
+    kind: str = "group"
 
 
 @dataclass(frozen=True)
@@ -129,13 +131,24 @@ class TelegramService:
         try:
             await self._ensure_authorized(client)
             groups: list[GroupInfo] = []
-            async for dialog in client.iter_dialogs():
+            async for dialog in client.iter_dialogs(ignore_migrated=True):
                 if dialog.is_group:
+                    entity = dialog.entity
+                    has_topics = bool(getattr(entity, "forum", False))
+                    is_supergroup = bool(getattr(entity, "megagroup", False))
                     groups.append(
                         GroupInfo(
                             id=int(dialog.id),
                             title=dialog.name or str(dialog.id),
-                            has_topics=bool(getattr(dialog.entity, "forum", False)),
+                            has_topics=has_topics,
+                            username=getattr(entity, "username", None),
+                            kind=(
+                                "forum"
+                                if has_topics
+                                else "supergroup"
+                                if is_supergroup
+                                else "group"
+                            ),
                         )
                     )
             groups.sort(key=lambda item: item.title.casefold())
