@@ -1,0 +1,1 @@
+"""TG Uploader application package."""
