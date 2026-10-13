@@ -640,9 +640,20 @@ class App(ctk.CTk):
         self._busy(True, self._t("connecting"))
         self._thread(lambda: self.events.put(("groups", service.list_groups())))
 
+    def _group_label(self, group: GroupInfo) -> str:
+        kind_key = {
+            "forum": "group_kind_forum",
+            "supergroup": "group_kind_supergroup",
+            "group": "group_kind_group",
+        }.get(group.kind, "group_kind_group")
+        kind = self._t(kind_key)
+        if group.username:
+            return f"{group.title}  ·  {kind}  ·  @{group.username}"
+        return f"{group.title}  ·  {kind}  ·  {self._t('technical_id')}: {group.id}"
+
     def _set_groups(self, groups):
         group_list = list(groups)
-        self.groups = {f"{g.title}  ·  {g.id}": g for g in group_list}
+        self.groups = {self._group_label(g): g for g in group_list}
         values = list(self.groups) or [self._t("no_groups")]
         self.group_menu.configure(values=values)
         self.group_menu.set(values[0])
