@@ -62,7 +62,7 @@ if not %errorlevel%==0 goto :error
 echo [7/7] Preparando a pasta final...
 if not exist "dist\TG-Uploader\data" mkdir "dist\TG-Uploader\data"
 copy /Y "README.md" "dist\TG-Uploader\README.md" >nul
-copy /Y "README.en.md" "dist\TG-Uploader\README.en.md" >nul
+copy /Y "README-en.md" "dist\TG-Uploader\README-en.md" >nul
 copy /Y "README.es.md" "dist\TG-Uploader\README.es.md" >nul
 copy /Y "PORTABLE.md" "dist\TG-Uploader\PORTABLE.md" >nul
 
