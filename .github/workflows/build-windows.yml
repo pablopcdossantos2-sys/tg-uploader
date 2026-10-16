@@ -50,7 +50,7 @@ jobs:
           python -m PyInstaller --noconfirm --clean --windowed --onedir --name "TG-Uploader" --collect-all customtkinter --collect-submodules telethon main.py
           New-Item -ItemType Directory -Force -Path "dist/TG-Uploader/data" | Out-Null
           Copy-Item README.md "dist/TG-Uploader/README.md"
-          Copy-Item README.en.md "dist/TG-Uploader/README.en.md"
+          Copy-Item README-en.md "dist/TG-Uploader/README-en.md"
           Copy-Item README.es.md "dist/TG-Uploader/README.es.md"
           Copy-Item PORTABLE.md "dist/TG-Uploader/PORTABLE.md"
 
