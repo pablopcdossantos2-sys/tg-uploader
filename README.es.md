@@ -1,10 +1,18 @@
 # TG Uploader
 
-**Lea este README en otros idiomas:** [Português](README.md) · [English](README.en.md)
+**Lea este README en otros idiomas:** [Português](README.md) · [English](README-en.md)
 
-Aplicación portátil para Windows destinada al envío de archivos desde una carpeta local a grupos de Telegram, con interfaz moderna, progreso real, historial de envíos, prevención de duplicados y recuperación de colas interrumpidas.
+Aplicación de escritorio portátil para Windows destinada al envío de archivos desde carpetas locales a grupos y temas de Telegram, con interfaz gráfica, seguimiento de progreso, historial de envíos, prevención de duplicados y recuperación de colas interrumpidas.
 
 > Proyecto independiente y no oficial. TG Uploader utiliza la API de Telegram mediante Telethon y no está afiliado a Telegram.
+
+## 👤 Autoría y desarrollo
+
+Aplicación de escritorio portátil para Windows desarrollada de forma independiente por Pablo Phillipe Cândido dos Santos, destinada al envío organizado de archivos desde carpetas locales a grupos y temas de Telegram, con seguimiento de progreso, historial, prevención de duplicados y recuperación de colas interrumpidas.
+
+El desarrollo contó con el uso de herramientas de inteligencia artificial generativa como recurso auxiliar, manteniéndose bajo responsabilidad del autor la concepción, implementación, integración y verificación del proyecto.
+
+Currículo Lattes: [http://lattes.cnpq.br/9500873674712528](http://lattes.cnpq.br/9500873674712528)
 
 ---
 
@@ -248,11 +256,11 @@ Mantenga activada **Incluir archivos de subcarpetas** si desea analizar también
 
 De forma predeterminada está activada:
 
-**Omitir archivos ya enviados al mismo grupo**
+**Omitir archivos ya enviados al mismo destino (grupo/tema)**
 
 Recomendamos mantenerla activada.
 
-TG Uploader calcula el SHA-256 y comprueba si ese contenido ya fue enviado al mismo grupo.
+TG Uploader calcula el SHA-256 y comprueba si ese contenido ya fue enviado al mismo destino (grupo/tema).
 
 Cambiar solamente el nombre del archivo no evita esta verificación.
 
@@ -577,7 +585,7 @@ Solo se habilita cuando existe una cola incompleta en la base local.
 
 Es normal si la protección está activada.
 
-Desactive **Omitir archivos ya enviados al mismo grupo** antes de crear una nueva cola si desea reenviar deliberadamente el mismo contenido.
+Desactive **Omitir archivos ya enviados al mismo destino (grupo/tema)** antes de crear una nueva cola si desea reenviar deliberadamente el mismo contenido.
 
 ---
 
@@ -589,7 +597,7 @@ TG-Uploader/
 ├── _internal/
 ├── data/
 ├── README.md
-├── README.en.md
+├── README-en.md
 ├── README.es.md
 └── PORTABLE.md
 ```
