@@ -1,10 +1,20 @@
 # TG Uploader
 
-**Leia este README em outros idiomas:** [English](README.en.md) · [Español](README.es.md)
+*Read this in other languages: [English](README-en.md)*
 
-Aplicativo portátil para Windows destinado ao envio de arquivos de uma pasta local para grupos do Telegram, com interface moderna, progresso real, histórico de uploads, prevenção de duplicados e retomada de filas interrompidas.
+**Também disponível em:** [Español](README.es.md)
+
+Aplicação desktop portátil para Windows destinada ao envio de arquivos de pastas locais para grupos e tópicos do Telegram, com interface gráfica, acompanhamento de progresso, histórico de uploads, prevenção de duplicados e retomada de filas interrompidas.
 
 > Projeto independente e não oficial. O TG Uploader usa a API do Telegram por meio da biblioteca Telethon e não é afiliado ao Telegram.
+
+## 👤 Autoria e desenvolvimento
+
+Aplicação desktop portátil para Windows desenvolvida de forma independente por Pablo Phillipe Cândido dos Santos, destinada ao envio organizado de arquivos de pastas locais para grupos e tópicos do Telegram, com acompanhamento de progresso, histórico, prevenção de duplicados e retomada de filas interrompidas.
+
+O desenvolvimento contou com a utilização de ferramentas de inteligência artificial generativa como recurso auxiliar no processo de desenvolvimento, mantendo-se sob responsabilidade do autor a concepção, implementação, integração e verificação do projeto.
+
+Currículo Lattes: [http://lattes.cnpq.br/9500873674712528](http://lattes.cnpq.br/9500873674712528)
 
 ---
 
@@ -262,11 +272,11 @@ Se quiser incluir também arquivos existentes dentro das subpastas, mantenha ati
 
 Por padrão, fica ativada a opção:
 
-**Ignorar arquivos já enviados ao mesmo grupo**
+**Ignorar arquivos já enviados ao mesmo destino (grupo/tópico)**
 
 Recomendamos deixá-la ativada.
 
-O programa calcula o SHA-256 de cada arquivo e evita enviar novamente o mesmo conteúdo para o mesmo grupo.
+O programa calcula o SHA-256 de cada arquivo e evita enviar novamente o mesmo conteúdo para o mesmo destino (grupo/tópico).
 
 Apenas renomear o arquivo não faz com que ele seja considerado um arquivo diferente.
 
@@ -618,7 +628,7 @@ Isso é esperado quando a proteção contra duplicados está ativada.
 
 Se realmente quiser reenviar o arquivo, desative:
 
-**Ignorar arquivos já enviados ao mesmo grupo**
+**Ignorar arquivos já enviados ao mesmo destino (grupo/tópico)**
 
 antes de criar uma nova fila.
 
@@ -632,7 +642,7 @@ TG-Uploader/
 ├── _internal/
 ├── data/
 ├── README.md
-├── README.en.md
+├── README-en.md
 ├── README.es.md
 └── PORTABLE.md
 ```
