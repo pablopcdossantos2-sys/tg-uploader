@@ -626,21 +626,6 @@ antes de criar uma nova fila.
 
 ---
 
-# Estrutura da versão portátil
-
-```text
-TG-Uploader/
-├── TG-Uploader.exe
-├── _internal/
-├── data/
-├── README.md
-├── README-en.md
-├── README.es.md
-└── PORTABLE.md
-```
-
----
-
 ## 👤 Autoria e desenvolvimento
 
 Aplicação desktop portátil para Windows desenvolvida de forma independente por Pablo Phillipe Cândido dos Santos, destinada ao envio organizado de arquivos de pastas locais para grupos e tópicos do Telegram, com acompanhamento de progresso, histórico, prevenção de duplicados e retomada de filas interrompidas.
