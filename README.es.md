@@ -6,14 +6,6 @@ Aplicación de escritorio portátil para Windows destinada al envío de archivos
 
 > Proyecto independiente y no oficial. TG Uploader utiliza la API de Telegram mediante Telethon y no está afiliado a Telegram.
 
-## 👤 Autoría y desarrollo
-
-Aplicación de escritorio portátil para Windows desarrollada de forma independiente por Pablo Phillipe Cândido dos Santos, destinada al envío organizado de archivos desde carpetas locales a grupos y temas de Telegram, con seguimiento de progreso, historial, prevención de duplicados y recuperación de colas interrumpidas.
-
-El desarrollo contó con el uso de herramientas de inteligencia artificial generativa como recurso auxiliar, manteniéndose bajo responsabilidad del autor la concepción, implementación, integración y verificación del proyecto.
-
-Currículo Lattes: [http://lattes.cnpq.br/9500873674712528](http://lattes.cnpq.br/9500873674712528)
-
 ---
 
 # Para quien solo quiere usar el programa
@@ -602,13 +594,10 @@ TG-Uploader/
 └── PORTABLE.md
 ```
 
-# Referencias
+## 👤 Autoría y desarrollo
 
-- Telegram — API ID y API Hash: <https://core.telegram.org/api/obtaining_api_id>
-- Telegram — Términos de servicio de la API: <https://core.telegram.org/api/terms>
-- Telethon: <https://docs.telethon.dev/>
-- PyInstaller: <https://pyinstaller.org/>
+Aplicación de escritorio portátil para Windows desarrollada de forma independiente por Pablo Phillipe Cândido dos Santos, destinada al envío organizado de archivos desde carpetas locales a grupos y temas de Telegram, con seguimiento de progreso, historial, prevención de duplicados y recuperación de colas interrumpidas.
 
-# Licencia
+El desarrollo contó con el uso de herramientas de inteligencia artificial generativa como recurso auxiliar, manteniéndose bajo responsabilidad del autor la concepción, implementación, integración y verificación del proyecto.
 
-Todavía no definida. Añada una licencia apropiada antes de distribuir versiones públicas.
+Currículo Lattes: [http://lattes.cnpq.br/9500873674712528](http://lattes.cnpq.br/9500873674712528)
