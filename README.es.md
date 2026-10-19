@@ -581,19 +581,6 @@ Desactive **Omitir archivos ya enviados al mismo destino (grupo/tema)** antes de
 
 ---
 
-# Estructura de la versión portátil
-
-```text
-TG-Uploader/
-├── TG-Uploader.exe
-├── _internal/
-├── data/
-├── README.md
-├── README-en.md
-├── README.es.md
-└── PORTABLE.md
-```
-
 ## 👤 Autoría y desarrollo
 
 Aplicación de escritorio portátil para Windows desarrollada de forma independiente por Pablo Phillipe Cândido dos Santos, destinada al envío organizado de archivos desde carpetas locales a grupos y temas de Telegram, con seguimiento de progreso, historial, prevención de duplicados y recuperación de colas interrumpidas.
