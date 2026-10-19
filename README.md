@@ -18,14 +18,12 @@ Você **não precisa instalar Python** e **não precisa digitar comandos** para 
 
 ## Passo 1 — Baixar a versão portátil
 
-1. Abra a página do projeto no GitHub.
-2. Clique na aba **Actions**.
-3. Abra a execução mais recente chamada **Build portable Windows app** que esteja marcada com um ícone verde de sucesso.
-4. Role a página até a seção **Artifacts**.
-5. Clique em **TG-Uploader-Windows-Portable**.
-6. O navegador baixará um arquivo compactado `.zip`.
+1. Abra a página de [Releases do TG Uploader](https://github.com/pablopcdossantos2-sys/tg-uploader/releases/latest).
+2. Abra a versão mais recente publicada.
+3. Na seção **Assets**, clique no arquivo `TG-Uploader-Windows-Portable-vX.Y.Z.zip` (o número da versão pode ser diferente).
+4. Aguarde o download do ZIP.
 
-> Se você recebeu a pasta portátil diretamente de outra pessoa, pode ignorar este passo.
+Você não precisa abrir a aba **Actions** para baixar uma versão publicada. A página de Releases mantém o pacote associado à versão.
 
 ## Passo 2 — Extrair o arquivo ZIP
 
@@ -375,29 +373,6 @@ Se quiser entregar uma cópia limpa do programa para outra pessoa:
 4. entregue essa cópia limpa.
 
 A outra pessoa fará a própria autenticação.
-
----
-
-# Usar o TG Uploader em um pendrive
-
-A aplicação é portátil.
-
-Você pode copiar a pasta inteira:
-
-```text
-TG-Uploader
-```
-
-para:
-
-- pendrive;
-- HD externo;
-- SSD externo;
-- outra pasta do computador.
-
-Não copie apenas `TG-Uploader.exe`.
-
-A pasta `_internal` também faz parte do programa.
 
 ---
 
