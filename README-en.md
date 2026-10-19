@@ -8,14 +8,6 @@ A portable Windows desktop application for uploading files from local folders to
 
 > Independent, unofficial project. TG Uploader uses the Telegram API through Telethon and is not affiliated with Telegram.
 
-## 👤 Authorship and development
-
-Portable Windows desktop application independently developed by Pablo Phillipe Cândido dos Santos, designed for organized file uploads from local folders to Telegram groups and topics, with progress tracking, history, duplicate prevention, and interrupted queue recovery.
-
-Generative artificial intelligence tools were used as supporting resources during development, while responsibility for the project's conception, implementation, integration, and verification remained with the author.
-
-Lattes CV: [http://lattes.cnpq.br/9500873674712528](http://lattes.cnpq.br/9500873674712528)
-
 ---
 
 # For users who only want to run the application
@@ -591,26 +583,10 @@ Disable **Skip files already uploaded to the same destination (group/topic)** be
 
 ---
 
-# Portable folder structure
+## 👤 Authorship and development
 
-```text
-TG-Uploader/
-├── TG-Uploader.exe
-├── _internal/
-├── data/
-├── README.md
-├── README-en.md
-├── README.es.md
-└── PORTABLE.md
-```
+Portable Windows desktop application independently developed by Pablo Phillipe Cândido dos Santos, designed for organized file uploads from local folders to Telegram groups and topics, with progress tracking, history, duplicate prevention, and interrupted queue recovery.
 
-# References
+Generative artificial intelligence tools were used as supporting resources during development, while responsibility for the project's conception, implementation, integration, and verification remained with the author.
 
-- Telegram — API ID and API Hash: <https://core.telegram.org/api/obtaining_api_id>
-- Telegram — API Terms of Service: <https://core.telegram.org/api/terms>
-- Telethon: <https://docs.telethon.dev/>
-- PyInstaller: <https://pyinstaller.org/>
-
-# License
-
-Not defined yet. Add an appropriate license before distributing public releases.
+Lattes CV: [http://lattes.cnpq.br/9500873674712528](http://lattes.cnpq.br/9500873674712528)
