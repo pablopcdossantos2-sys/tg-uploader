@@ -1,0 +1,110 @@
+name: Publish portable Windows release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "RELEASE_VERSION"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Read and validate release version
+        shell: pwsh
+        run: |
+          $version = (Get-Content "RELEASE_VERSION" -Raw).Trim()
+          if ($version -notmatch '^v\d+\.\d+\.\d+$') {
+            throw "RELEASE_VERSION must use semantic version format, e.g. v0.1.0"
+          }
+          "RELEASE_VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt "pyinstaller>=6.10,<7"
+
+      - name: Validate Python source
+        shell: pwsh
+        run: |
+          python -m compileall -q main.py src tests
+
+      - name: Run tests
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -v
+
+      - name: Build portable application and release archive
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --windowed --onedir --name "TG-Uploader" --collect-all customtkinter --collect-submodules telethon main.py
+
+          New-Item -ItemType Directory -Force -Path "dist/TG-Uploader/data" | Out-Null
+          Copy-Item README.md "dist/TG-Uploader/README.md"
+          Copy-Item README-en.md "dist/TG-Uploader/README-en.md"
+          Copy-Item README.es.md "dist/TG-Uploader/README.es.md"
+          Copy-Item PORTABLE.md "dist/TG-Uploader/PORTABLE.md"
+
+          New-Item -ItemType Directory -Force -Path "dist/package/TG-Uploader" | Out-Null
+          Copy-Item -Path "dist/TG-Uploader/*" -Destination "dist/package/TG-Uploader" -Recurse -Force
+
+          $archive = "dist/TG-Uploader-Windows-Portable-$env:RELEASE_VERSION.zip"
+          Compress-Archive -Path "dist/package/*" -DestinationPath $archive -CompressionLevel Optimal -Force
+
+          $hash = Get-FileHash $archive -Algorithm SHA256
+          "$($hash.Hash)  $(Split-Path $archive -Leaf)" | Set-Content -Path "$archive.sha256" -Encoding ascii
+
+          Get-Item $archive | Format-List Name, Length
+          Get-Item "$archive.sha256" | Format-List Name, Length
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          name: TG Uploader ${{ env.RELEASE_VERSION }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          fail_on_unmatched_files: true
+          body: |
+            ## TG Uploader ${{ env.RELEASE_VERSION }}
+
+            Portable Windows desktop application for uploading local files to Telegram groups and topics.
+
+            ### Download and run
+            1. Download `TG-Uploader-Windows-Portable-${{ env.RELEASE_VERSION }}.zip` below.
+            2. Extract the complete ZIP file.
+            3. Open the `TG-Uploader` folder and run `TG-Uploader.exe`.
+
+            Python and a Windows installer are not required on the target computer.
+
+            ### Included capabilities
+            - Telegram group and topic selection
+            - File-level upload progress
+            - Persistent upload history and queues
+            - Duplicate detection scoped to the destination (group/topic)
+            - Recovery of interrupted queues
+
+            ### Security note
+            The local `data/` directory can contain Telegram session data and API credentials. Do not share that directory. A clean distribution should have an empty `data/` directory.
+
+            The SHA-256 checksum file is provided so the downloaded ZIP can be checked for integrity.
+          files: |
+            dist/TG-Uploader-Windows-Portable-${{ env.RELEASE_VERSION }}.zip
+            dist/TG-Uploader-Windows-Portable-${{ env.RELEASE_VERSION }}.zip.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
