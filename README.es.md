@@ -16,14 +16,12 @@ Si **no está familiarizado con Terminal, PowerShell, Python o GitHub**, esta es
 
 ## Paso 1 — Descargar la versión portátil
 
-1. Abra la página del proyecto en GitHub.
-2. Haga clic en la pestaña **Actions**.
-3. Abra la ejecución más reciente de **Build portable Windows app** que tenga un indicador verde de éxito.
-4. Baje hasta la sección **Artifacts**.
-5. Haga clic en **TG-Uploader-Windows-Portable**.
-6. El navegador descargará un archivo `.zip`.
+1. Abra la página de [Releases de TG Uploader](https://github.com/pablopcdossantos2-sys/tg-uploader/releases/latest).
+2. Abra la versión publicada más reciente.
+3. En **Assets**, haga clic en `TG-Uploader-Windows-Portable-vX.Y.Z.zip` (el número de versión puede ser diferente).
+4. Espere a que termine la descarga del ZIP.
 
-> Si otra persona ya le entregó la carpeta portátil, puede omitir este paso.
+No necesita abrir la pestaña **Actions** para descargar una versión publicada. La página de Releases mantiene el paquete asociado a esa versión.
 
 ## Paso 2 — Extraer el ZIP
 
@@ -353,24 +351,6 @@ Para entregar una copia limpia:
 4. entregue esa copia.
 
 La otra persona podrá autenticar su propia cuenta.
-
----
-
-# Utilizar TG Uploader desde una memoria USB
-
-TG Uploader es portátil.
-
-Copie toda la carpeta:
-
-```text
-TG-Uploader
-```
-
-a una memoria USB, disco externo o SSD externo.
-
-No copie únicamente `TG-Uploader.exe`.
-
-La carpeta `_internal` también es necesaria.
 
 ---
 
