@@ -8,14 +8,6 @@ Aplicação desktop portátil para Windows destinada ao envio de arquivos de pas
 
 > Projeto independente e não oficial. O TG Uploader usa a API do Telegram por meio da biblioteca Telethon e não é afiliado ao Telegram.
 
-## 👤 Autoria e desenvolvimento
-
-Aplicação desktop portátil para Windows desenvolvida de forma independente por Pablo Phillipe Cândido dos Santos, destinada ao envio organizado de arquivos de pastas locais para grupos e tópicos do Telegram, com acompanhamento de progresso, histórico, prevenção de duplicados e retomada de filas interrompidas.
-
-O desenvolvimento contou com a utilização de ferramentas de inteligência artificial generativa como recurso auxiliar no processo de desenvolvimento, mantendo-se sob responsabilidade do autor a concepção, implementação, integração e verificação do projeto.
-
-Currículo Lattes: [http://lattes.cnpq.br/9500873674712528](http://lattes.cnpq.br/9500873674712528)
-
 ---
 
 # Para quem só quer usar o programa
@@ -649,13 +641,10 @@ TG-Uploader/
 
 ---
 
-# Referências
+## 👤 Autoria e desenvolvimento
 
-- Telegram — API ID e API Hash: <https://core.telegram.org/api/obtaining_api_id>
-- Telegram — Termos de Serviço da API: <https://core.telegram.org/api/terms>
-- Telethon: <https://docs.telethon.dev/>
-- PyInstaller: <https://pyinstaller.org/>
+Aplicação desktop portátil para Windows desenvolvida de forma independente por Pablo Phillipe Cândido dos Santos, destinada ao envio organizado de arquivos de pastas locais para grupos e tópicos do Telegram, com acompanhamento de progresso, histórico, prevenção de duplicados e retomada de filas interrompidas.
 
-# Licença
+O desenvolvimento contou com a utilização de ferramentas de inteligência artificial generativa como recurso auxiliar no processo de desenvolvimento, mantendo-se sob responsabilidade do autor a concepção, implementação, integração e verificação do projeto.
 
-Ainda não definida. Antes de distribuir releases publicamente, adicione uma licença apropriada ao projeto.
+Currículo Lattes: [http://lattes.cnpq.br/9500873674712528](http://lattes.cnpq.br/9500873674712528)
